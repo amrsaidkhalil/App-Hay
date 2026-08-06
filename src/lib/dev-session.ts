@@ -1,7 +1,7 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import { isGoogleAuthConfigured } from "@/auth";
+import { auth, isGoogleAuthConfigured } from "@/auth";
 
 const DEV_SESSION_COOKIE = "dc_dev_session";
 
@@ -14,11 +14,19 @@ export const devAuthAvailable =
   process.env.NODE_ENV !== "production" && !isGoogleAuthConfigured;
 
 export async function getCurrentUser() {
-  if (!devAuthAvailable) return null;
-  const cookieStore = await cookies();
-  const userId = cookieStore.get(DEV_SESSION_COOKIE)?.value;
-  if (!userId) return null;
-  return prisma.user.findUnique({ where: { id: userId } });
+  if (devAuthAvailable) {
+    const cookieStore = await cookies();
+    const userId = cookieStore.get(DEV_SESSION_COOKIE)?.value;
+    if (userId) {
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (user) return user;
+    }
+  }
+
+  if (!isGoogleAuthConfigured) return null;
+  const session = await auth();
+  if (!session?.user?.id) return null;
+  return prisma.user.findUnique({ where: { id: session.user.id } });
 }
 
 export async function devSignIn(userId: string) {

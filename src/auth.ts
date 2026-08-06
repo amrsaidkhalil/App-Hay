@@ -23,6 +23,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     : [],
   session: { strategy: "database" },
   pages: { signIn: "/login" },
+  callbacks: {
+    session({ session, user }) {
+      session.user.id = user.id;
+      return session;
+    },
+  },
 });
 
 export const isGoogleAuthConfigured = googleConfigured;

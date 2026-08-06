@@ -63,6 +63,10 @@ const ORGS = [
   },
 ];
 
+// Bilaal TV and Action MC are Amr's own ventures (OWNER); the rest are
+// client orgs he runs the digital presence for via Action MC (ADMIN).
+const OWNER_ORG_SLUGS = new Set(["bilaal-tv", "action-mc", "personal"]);
+
 async function main() {
   for (const org of ORGS) {
     await prisma.organization.upsert({
@@ -77,48 +81,68 @@ async function main() {
     update: {},
     create: {
       email: "amr@example.com",
+      name: "Amr Khalil (dev)",
+      image: null,
+    },
+  });
+
+  const realUser = await prisma.user.upsert({
+    where: { email: "amrsaidkhalil@gmail.com" },
+    update: { name: "Amr Khalil" },
+    create: {
+      email: "amrsaidkhalil@gmail.com",
       name: "Amr Khalil",
       image: null,
     },
   });
 
-  const bilaalTv = await prisma.organization.findUniqueOrThrow({
-    where: { slug: "bilaal-tv" },
-  });
-  const actionMc = await prisma.organization.findUniqueOrThrow({
-    where: { slug: "action-mc" },
-  });
+  const allOrgs = await prisma.organization.findMany();
 
-  for (const org of [bilaalTv, actionMc]) {
-    await prisma.membership.upsert({
-      where: { userId_orgId: { userId: devUser.id, orgId: org.id } },
-      update: { role: "OWNER" },
-      create: { userId: devUser.id, orgId: org.id, role: "OWNER" },
-    });
+  for (const user of [devUser, realUser]) {
+    for (const org of allOrgs) {
+      const role = OWNER_ORG_SLUGS.has(org.slug) ? "OWNER" : "ADMIN";
+      await prisma.membership.upsert({
+        where: { userId_orgId: { userId: user.id, orgId: org.id } },
+        update: { role },
+        create: { userId: user.id, orgId: org.id, role },
+      });
+    }
   }
 
-  await prisma.card.upsert({
-    where: { orgId_slug: { orgId: bilaalTv.id, slug: "amr-khalil" } },
-    update: {},
-    create: {
-      orgId: bilaalTv.id,
-      ownerUserId: devUser.id,
-      slug: "amr-khalil",
-      jobTitle: "Founder & Director",
-      phone: "+27 11 000 0000",
-      whatsapp: "+27 11 000 0000",
-      email: "amr@bilaal.tv",
-      website: "https://bilaal.tv",
-      socialLinks: JSON.stringify({
-        instagram: "https://instagram.com/bilaaltv",
-        linkedin: "https://linkedin.com/company/bilaaltv",
-      }),
-    },
-  });
+  const bilaalTv = allOrgs.find((o) => o.slug === "bilaal-tv")!;
+
+  // devUser first, explicitly renamed off "amr-khalil" — an earlier seed run
+  // may have already created its card at that slug, which realUser now needs.
+  for (const [user, slug] of [
+    [devUser, "amr-khalil-dev"],
+    [realUser, "amr-khalil"],
+  ] as const) {
+    await prisma.card.upsert({
+      where: {
+        orgId_ownerUserId: { orgId: bilaalTv.id, ownerUserId: user.id },
+      },
+      update: { slug },
+      create: {
+        orgId: bilaalTv.id,
+        ownerUserId: user.id,
+        slug,
+        jobTitle: "Founder & Director",
+        phone: "+27 11 000 0000",
+        whatsapp: "+27 11 000 0000",
+        email: "amr@bilaal.tv",
+        website: "https://bilaal.tv",
+        socialLinks: JSON.stringify({
+          instagram: "https://instagram.com/bilaaltv",
+          linkedin: "https://linkedin.com/company/bilaaltv",
+        }),
+      },
+    });
+  }
 
   console.log("Seed complete:", {
     orgs: ORGS.length,
     devUser: devUser.email,
+    realUser: realUser.email,
   });
 }
 
