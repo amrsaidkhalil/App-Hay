@@ -1,7 +1,9 @@
+import "server-only";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/dev-session";
 
-export default async function Home() {
+export async function requireUser() {
   const user = await getCurrentUser();
-  redirect(user ? "/dashboard" : "/login");
+  if (!user) redirect("/login");
+  return user;
 }

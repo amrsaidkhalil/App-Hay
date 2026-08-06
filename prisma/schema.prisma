@@ -1,0 +1,132 @@
+// Digital Cards — schema. SQLite for local dev; swap datasource provider to
+// "postgresql" for production without touching model definitions.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum ContactSource {
+  AI_SCAN
+  CARD_INBOUND
+}
+
+enum CrmProvider {
+  GOOGLE_CONTACTS
+}
+
+model Organization {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  name           String
+  logoUrl        String?
+  primaryColor   String   @default("#111827")
+  secondaryColor String   @default("#34d399")
+  headingFont    String   @default("Poppins")
+  bodyFont       String   @default("Poppins")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  memberships     Membership[]
+  cards           Card[]
+  scannedContacts ScannedContact[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships     Membership[]
+  cards           Card[]
+  scannedContacts ScannedContact[]
+  crmConnections  CrmConnection[]
+}
+
+model Membership {
+  id     String @id @default(cuid())
+  role   Role   @default(MEMBER)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  orgId String
+  org   Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, orgId])
+}
+
+model Card {
+  id        String  @id @default(cuid())
+  slug      String
+  jobTitle  String?
+  phone     String?
+  whatsapp  String?
+  email     String?
+  website   String?
+  socialLinks String @default("{}") // JSON string: SQLite has no native Json type in this setup
+  photoUrl  String?
+
+  ownerUserId String
+  owner       User   @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+
+  orgId String
+  org   Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([orgId, slug])
+  @@unique([orgId, ownerUserId])
+}
+
+model ScannedContact {
+  id           String        @id @default(cuid())
+  name         String?
+  jobTitle     String?
+  company      String?
+  phone        String?
+  email        String?
+  rawImageUrl  String?
+  source       ContactSource @default(AI_SCAN)
+  syncedToCrm  Boolean       @default(false)
+
+  orgId String
+  org   Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  scannedByUserId String
+  scannedBy       User   @relation(fields: [scannedByUserId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model CrmConnection {
+  id           String      @id @default(cuid())
+  provider     CrmProvider
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, provider])
+}

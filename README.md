@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Digital Cards
 
-## Getting Started
+A HeyDrop-style digital business card + AI lead scanner + CRM sync tool,
+built for use across Bilaal TV, Al-Iman Foundation, Wings of Mercy, EL HUDAA,
+Shura Council, and Action MC.
 
-First, run the development server:
+## Stack
+
+Next.js 16 (App Router) + TypeScript + Tailwind v4, Prisma + SQLite (dev;
+swap to Postgres for production), Auth.js (Google), Anthropic Claude
+(vision, for the scanner), `qrcode`.
+
+## Running locally
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npx prisma migrate dev
+npx prisma db seed
+npm run dev -- --port 3100
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Sign in with the "Continue as dev user (local only)" button on `/login` —
+this bypass is active whenever Google OAuth isn't configured and
+`NODE_ENV !== "production"`. The seeded dev user (`amr@example.com`) owns
+cards under Bilaal TV and Action MC.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## What works today (Phase 1)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Card CRUD with live preview, per-org branding (colors/fonts)
+- Public card pages (`/c/[org]/[card]`) with QR code + `.vcf` download
+- Inbound lead capture ("share your info back" on the public page)
+- AI Contact Scanner (photo → parsed fields → confirm → save), once
+  `ANTHROPIC_API_KEY` is set
+- Leads table + CSV export
+- Org branding settings (owner/admin only)
+- Installable PWA (manifest + service worker, production only)
 
-## Learn More
+## Post-build checklist (Phase 2 — optional, gated by env vars)
 
-To learn more about Next.js, take a look at the following resources:
+Nothing below is required for the app to work — QR + vCard sharing and CSV
+export work with zero external accounts. Add these when you want the extra
+integrations:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Feature | What to do | Env vars |
+|---|---|---|
+| AI Contact Scanner | Get an Anthropic API key | `ANTHROPIC_API_KEY` |
+| Google sign-in + Contacts sync | Create a free OAuth client at [console.cloud.google.com](https://console.cloud.google.com/apis/credentials). Redirect URI: `<your-url>/api/auth/callback/google`. Then add the `Account`/`Session`/`VerificationToken` tables Auth.js's Prisma adapter expects (`npx prisma migrate dev`) | `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_SECRET` |
+| Add to Google Wallet | Create a Google Wallet Issuer account + service account with "Wallet Object Issuer" role ([guide](https://developers.google.com/wallet/generic/getting-started)) | `GOOGLE_WALLET_ISSUER_ID`, `GOOGLE_WALLET_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_WALLET_PRIVATE_KEY` |
+| Add to Apple Wallet | Enroll in the Apple Developer Program ($99/yr), generate a Pass Type ID certificate, then implement `buildAppleWalletPass()` in `src/lib/wallet/apple.ts` (the comment there has the exact steps + library to use) | `APPLE_PASS_TYPE_ID`, `APPLE_TEAM_ID`, `APPLE_PASS_CERT_BASE64`, `APPLE_PASS_CERT_PASSWORD`, `APPLE_WWDR_CERT_BASE64` |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+All of these are read from `.env` — see the comments there for exact
+instructions per variable.
 
-## Deploy on Vercel
+## Deploying
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Target is Vercel (matches `bilaal-tv-web`). Swap the Prisma `datasource` in
+`prisma/schema.prisma` from `sqlite` to `postgresql`, point `DATABASE_URL` at
+a real Postgres instance (Vercel Postgres/Supabase/Neon all work), run
+`prisma migrate deploy`, and set a real `AUTH_SECRET`.
