@@ -4,17 +4,21 @@ A HeyDrop-style digital business card + AI lead scanner + CRM sync tool,
 built for use across Bilaal TV, Al-Iman Foundation, Wings of Mercy, EL HUDAA,
 Shura Council, and Action MC.
 
+Live repo: https://github.com/amrsaidkhalil/App-Hay
+
 ## Stack
 
-Next.js 16 (App Router) + TypeScript + Tailwind v4, Prisma + SQLite (dev;
-swap to Postgres for production), Auth.js (Google), Anthropic Claude
-(vision, for the scanner), `qrcode`.
+Next.js 16 (App Router) + TypeScript + Tailwind v4, Prisma + Postgres,
+Auth.js (Google), Anthropic Claude (vision, for the scanner), `qrcode`.
 
 ## Running locally
 
+Needs a Postgres database — the free tier of [Neon](https://neon.tech) or
+Vercel Postgres both work. Point `DATABASE_URL` in `.env` at it, then:
+
 ```bash
 npm install
-npx prisma migrate dev
+npx prisma db push
 npx prisma db seed
 npm run dev -- --port 3100
 ```
@@ -44,7 +48,7 @@ integrations:
 | Feature | What to do | Env vars |
 |---|---|---|
 | AI Contact Scanner | Get an Anthropic API key | `ANTHROPIC_API_KEY` |
-| Google sign-in + Contacts sync | Create a free OAuth client at [console.cloud.google.com](https://console.cloud.google.com/apis/credentials). Redirect URI: `<your-url>/api/auth/callback/google`. Then add the `Account`/`Session`/`VerificationToken` tables Auth.js's Prisma adapter expects (`npx prisma migrate dev`) | `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_SECRET` |
+| Google sign-in + Contacts sync | Create a free OAuth client at [console.cloud.google.com](https://console.cloud.google.com/apis/credentials). Redirect URI: `<your-url>/api/auth/callback/google`. Then add the `Account`/`Session`/`VerificationToken` tables Auth.js's Prisma adapter expects (`npx prisma db push`) | `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_SECRET` |
 | Add to Google Wallet | Create a Google Wallet Issuer account + service account with "Wallet Object Issuer" role ([guide](https://developers.google.com/wallet/generic/getting-started)) | `GOOGLE_WALLET_ISSUER_ID`, `GOOGLE_WALLET_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_WALLET_PRIVATE_KEY` |
 | Add to Apple Wallet | Enroll in the Apple Developer Program ($99/yr), generate a Pass Type ID certificate, then implement `buildAppleWalletPass()` in `src/lib/wallet/apple.ts` (the comment there has the exact steps + library to use) | `APPLE_PASS_TYPE_ID`, `APPLE_TEAM_ID`, `APPLE_PASS_CERT_BASE64`, `APPLE_PASS_CERT_PASSWORD`, `APPLE_WWDR_CERT_BASE64` |
 
@@ -53,7 +57,16 @@ instructions per variable.
 
 ## Deploying
 
-Target is Vercel (matches `bilaal-tv-web`). Swap the Prisma `datasource` in
-`prisma/schema.prisma` from `sqlite` to `postgresql`, point `DATABASE_URL` at
-a real Postgres instance (Vercel Postgres/Supabase/Neon all work), run
-`prisma migrate deploy`, and set a real `AUTH_SECRET`.
+1. Import `amrsaidkhalil/App-Hay` into Vercel (vercel.com → Add New →
+   Project).
+2. Vercel's Storage tab → Create Database → Postgres (Neon-backed) →
+   `DATABASE_URL` gets set automatically.
+3. Add `AUTH_SECRET` (any random string) and `ANTHROPIC_API_KEY` in
+   Project Settings → Environment Variables. The Phase 2 vars in the table
+   above are optional.
+4. Deploy. The build command (`prisma generate && prisma db push && next
+   build`) creates the schema on first deploy automatically — no manual
+   migration step needed.
+5. Run the seed once against the new database (from your machine, with
+   `DATABASE_URL` pointed at the Vercel/Neon database):
+   `npx prisma db seed`.
