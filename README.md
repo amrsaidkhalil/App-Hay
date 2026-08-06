@@ -64,9 +64,8 @@ instructions per variable.
 3. Add `AUTH_SECRET` (any random string) and `ANTHROPIC_API_KEY` in
    Project Settings → Environment Variables. The Phase 2 vars in the table
    above are optional.
-4. Deploy. The build command (`prisma generate && prisma db push && next
-   build`) creates the schema on first deploy automatically — no manual
-   migration step needed.
-5. Run the seed once against the new database (from your machine, with
-   `DATABASE_URL` pointed at the Vercel/Neon database):
-   `npx prisma db seed`.
+4. Deploy. The build command (`prisma generate && prisma db push && prisma
+   db seed && next build`) creates the schema and seeds the 6 orgs
+   automatically on every deploy — no manual step needed. The seed uses
+   `upsert`, so re-running it on later deploys is safe and won't duplicate
+   data.
