@@ -2,29 +2,16 @@
 
 import { useRef, useState, useCallback } from "react";
 import { ZoomIn, RotateCcw, Move } from "lucide-react";
+import {
+  framingStyle,
+  DEFAULT_FRAMING,
+  FRAMING_MIN_SCALE as MIN_SCALE,
+  FRAMING_MAX_SCALE as MAX_SCALE,
+  type ImageFraming,
+} from "@/lib/framing";
 
-export type ImageFraming = {
-  scale: number;
-  offsetX: number;
-  offsetY: number;
-};
-
-export const DEFAULT_FRAMING: ImageFraming = {
-  scale: 1,
-  offsetX: 0,
-  offsetY: 0,
-};
-
-/** Turn framing values into the transform used both here and on the card. */
-export function framingStyle(f: ImageFraming): React.CSSProperties {
-  return {
-    transform: `translate(${f.offsetX}%, ${f.offsetY}%) scale(${f.scale})`,
-    transformOrigin: "center",
-  };
-}
-
-const MIN_SCALE = 0.4;
-const MAX_SCALE = 3;
+export { DEFAULT_FRAMING };
+export type { ImageFraming };
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
 
 /**

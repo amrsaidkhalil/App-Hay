@@ -10,11 +10,8 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { BrandCard } from "./brand-card";
-import {
-  ImageAdjuster,
-  DEFAULT_FRAMING,
-  type ImageFraming,
-} from "./image-adjuster";
+import { ImageAdjuster } from "./image-adjuster";
+import { DEFAULT_FRAMING, type ImageFraming } from "@/lib/framing";
 import { contrastRatio } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 

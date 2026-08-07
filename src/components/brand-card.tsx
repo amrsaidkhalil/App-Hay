@@ -3,7 +3,7 @@
    possible host or `hostname: "**"`, which turns the app into an open image
    proxy. These assets are small, so plain <img> is the safer trade. */
 import { buildCardTheme } from "@/lib/brand";
-import { framingStyle, type ImageFraming } from "./image-adjuster";
+import { framingStyle, type ImageFraming } from "@/lib/framing";
 import { cn } from "@/lib/utils";
 
 export type BrandCardData = {
@@ -149,11 +149,14 @@ export function BrandCard({
 
       {qrDataUrl ? (
         <div className={cn("flex justify-center", compact ? "mt-5" : "mt-6")}>
-          {/* White quiet zone + accent ring — keeps the code scannable on any
-              background while still reading as part of the card. */}
+          {/* Quiet zone matches the generated code's light color, so the
+              padding and the QR read as one block rather than a white sticker. */}
           <span
-            className="rounded-2xl bg-white p-2.5"
-            style={{ border: `2.5px solid ${theme.accent}` }}
+            className="rounded-2xl p-2.5"
+            style={{
+              backgroundColor: theme.qrLight,
+              border: `2.5px solid ${theme.accent}`,
+            }}
           >
             <img
               src={qrDataUrl}

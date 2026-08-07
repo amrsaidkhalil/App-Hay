@@ -13,11 +13,8 @@ import {
   Briefcase,
 } from "lucide-react";
 import { BrandCard, type BrandCardData } from "./brand-card";
-import {
-  ImageAdjuster,
-  DEFAULT_FRAMING,
-  type ImageFraming,
-} from "./image-adjuster";
+import { ImageAdjuster } from "./image-adjuster";
+import { DEFAULT_FRAMING, type ImageFraming } from "@/lib/framing";
 import {
   InstagramGlyph,
   LinkedinGlyph,
