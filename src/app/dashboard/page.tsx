@@ -13,7 +13,7 @@ export default async function DashboardPage() {
   const memberships = await prisma.membership.findMany({
     where: { userId: user.id },
     include: { org: true },
-    orderBy: { org: { name: "asc" } },
+    orderBy: [{ isPrimary: "desc" }, { org: { name: "asc" } }],
   });
 
   const cards = await prisma.card.findMany({

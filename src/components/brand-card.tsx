@@ -93,7 +93,7 @@ export function BrandCard({
         <span
           className={cn(
             "flex shrink-0 items-center justify-center overflow-hidden rounded-full",
-            compact ? "h-16 w-16" : "h-20 w-20"
+            compact ? "h-24 w-24" : "h-28 w-28"
           )}
           style={{
             border: `2.5px solid ${theme.accent}`,
@@ -120,7 +120,7 @@ export function BrandCard({
             />
           ) : (
             <span
-              className={cn("font-semibold", compact ? "text-lg" : "text-xl")}
+              className={cn("font-semibold", compact ? "text-2xl" : "text-3xl")}
               style={{ color: theme.text }}
             >
               {initials(data.name)}

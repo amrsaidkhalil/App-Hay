@@ -109,8 +109,11 @@ model VerificationToken {
 }
 
 model Membership {
-  id     String @id @default(cuid())
-  role   Role   @default(MEMBER)
+  id     String  @id @default(cuid())
+  role   Role    @default(MEMBER)
+  // The brand this user wants to see first in their card list. At most one
+  // true per userId, enforced in the setPrimaryBrand action (not the DB).
+  isPrimary Boolean @default(false)
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -1,4 +1,5 @@
-import { Download, ScanLine, UserPlus, Users } from "lucide-react";
+import Link from "next/link";
+import { Download, ScanLine, UserPlus, Users, ChevronRight } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/prisma";
 
@@ -39,10 +40,10 @@ export default async function LeadsPage() {
           </p>
         </div>
         {contacts.length > 0 ? (
-          <a href="/dashboard/leads/export" className="btn-ghost text-sm">
+          <Link href="/dashboard/leads/export" className="btn-ghost text-sm">
             <Download size={16} strokeWidth={1.8} aria-hidden />
             Export CSV
-          </a>
+          </Link>
         ) : null}
       </div>
 
@@ -71,55 +72,61 @@ export default async function LeadsPage() {
             };
             const { Icon } = meta;
             return (
-              <li key={c.id} className="flex items-start gap-3.5 px-4 py-4">
-                <span
-                  className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--app-overlay-strong)] text-[var(--app-fg-muted)]"
-                  aria-hidden
+              <li key={c.id}>
+                <Link
+                  href={`/dashboard/leads/${c.id}`}
+                  className="flex min-h-[64px] items-start gap-3.5 px-4 py-4 transition-colors duration-200 hover:bg-[var(--app-overlay)] active:bg-[var(--app-overlay-strong)]"
                 >
-                  <Icon size={17} strokeWidth={1.8} />
-                </span>
+                  <span
+                    className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--app-overlay-strong)] text-[var(--app-fg-muted)]"
+                    aria-hidden
+                  >
+                    <Icon size={17} strokeWidth={1.8} />
+                  </span>
 
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[15px] font-medium text-[var(--app-fg)]">
-                    {c.name ?? "Unnamed contact"}
-                  </p>
-                  {c.jobTitle || c.company ? (
-                    <p className="truncate text-[13px] text-[var(--app-fg-muted)]">
-                      {[c.jobTitle, c.company].filter(Boolean).join(" · ")}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[15px] font-medium text-[var(--app-fg)]">
+                      {c.name ?? "Unnamed contact"}
                     </p>
-                  ) : null}
+                    {c.jobTitle || c.company ? (
+                      <p className="truncate text-[13px] text-[var(--app-fg-muted)]">
+                        {[c.jobTitle, c.company].filter(Boolean).join(" · ")}
+                      </p>
+                    ) : null}
 
-                  <div className="mt-1.5 space-y-0.5">
-                    {c.email ? (
-                      <a
-                        href={`mailto:${c.email}`}
-                        className="block truncate text-[13px] text-[var(--app-fg-muted)] underline-offset-2 hover:text-[var(--app-fg)] hover:underline"
-                      >
-                        {c.email}
-                      </a>
-                    ) : null}
-                    {c.phone ? (
-                      <a
-                        href={`tel:${c.phone.replace(/[^\d+]/g, "")}`}
-                        className="block truncate text-[13px] text-[var(--app-fg-muted)] underline-offset-2 hover:text-[var(--app-fg)] hover:underline"
-                      >
-                        {c.phone}
-                      </a>
-                    ) : null}
+                    <div className="mt-1.5 space-y-0.5">
+                      {c.email ? (
+                        <p className="truncate text-[13px] text-[var(--app-fg-muted)]">
+                          {c.email}
+                        </p>
+                      ) : null}
+                      {c.phone ? (
+                        <p className="truncate text-[13px] text-[var(--app-fg-muted)]">
+                          {c.phone}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                      <span className="rounded-full bg-[var(--app-overlay-strong)] px-2 py-0.5 text-[11px] text-[var(--app-fg-subtle)]">
+                        {meta.label}
+                      </span>
+                      <span className="rounded-full bg-[var(--app-overlay-strong)] px-2 py-0.5 text-[11px] text-[var(--app-fg-subtle)]">
+                        {c.org.name}
+                      </span>
+                      <span className="text-[11px] text-[var(--app-fg-subtle)]">
+                        {c.createdAt.toLocaleDateString()}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                    <span className="rounded-full bg-[var(--app-overlay-strong)] px-2 py-0.5 text-[11px] text-[var(--app-fg-subtle)]">
-                      {meta.label}
-                    </span>
-                    <span className="rounded-full bg-[var(--app-overlay-strong)] px-2 py-0.5 text-[11px] text-[var(--app-fg-subtle)]">
-                      {c.org.name}
-                    </span>
-                    <span className="text-[11px] text-[var(--app-fg-subtle)]">
-                      {c.createdAt.toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
+                  <ChevronRight
+                    size={18}
+                    strokeWidth={1.8}
+                    className="mt-1.5 shrink-0 text-[var(--app-fg-subtle)]"
+                    aria-hidden
+                  />
+                </Link>
               </li>
             );
           })}

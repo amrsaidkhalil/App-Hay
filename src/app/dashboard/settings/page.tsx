@@ -6,13 +6,14 @@ import {
   ScanLine,
   Wallet,
   Plus,
+  Star,
 } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/prisma";
 import { scannerConfigured } from "@/lib/scan-card";
 import { appleWalletConfigured } from "@/lib/wallet/apple";
 import { googleWalletConfigured } from "@/lib/wallet/google";
-import { signOutAction } from "../actions";
+import { signOutAction, setPrimaryBrandAction } from "../actions";
 
 function Row({
   href,
@@ -53,7 +54,7 @@ export default async function SettingsPage() {
   const memberships = await prisma.membership.findMany({
     where: { userId: user.id },
     include: { org: true },
-    orderBy: { org: { name: "asc" } },
+    orderBy: [{ isPrimary: "desc" }, { org: { name: "asc" } }],
   });
 
   const manageable = memberships.filter(
@@ -81,21 +82,61 @@ export default async function SettingsPage() {
               You don&apos;t manage any brands yet.
             </p>
           ) : (
-            manageable.map(({ org, role }) => (
-              <Row
-                key={org.id}
-                href={`/dashboard/org/${org.slug}/settings`}
-                icon={
+            manageable.map(({ org, role, isPrimary }) => (
+              <div key={org.id} className="flex items-center gap-1">
+                <Link
+                  href={`/dashboard/org/${org.slug}/settings`}
+                  className="flex min-h-[56px] min-w-0 flex-1 items-center gap-3 px-4 py-3 transition-colors duration-200 hover:bg-[var(--app-overlay)] active:bg-[var(--app-overlay-strong)]"
+                >
                   <span
-                    className="block h-5 w-5 rounded-md ring-1 ring-white/15"
+                    className="block h-5 w-5 shrink-0 rounded-md ring-1 ring-white/15"
                     style={{
                       background: `linear-gradient(135deg, ${org.primaryColor}, ${org.secondaryColor})`,
                     }}
+                    aria-hidden
                   />
-                }
-                label={org.name}
-                hint={role}
-              />
+                  <span className="min-w-0 flex-1 truncate text-[15px] text-[var(--app-fg)]">
+                    {org.name}
+                  </span>
+                  <span className="text-xs text-[var(--app-fg-subtle)]">
+                    {role}
+                  </span>
+                  <ChevronRight
+                    size={18}
+                    strokeWidth={1.8}
+                    className="shrink-0 text-[var(--app-fg-subtle)]"
+                    aria-hidden
+                  />
+                </Link>
+                <form action={setPrimaryBrandAction} className="shrink-0 pr-2.5">
+                  <input type="hidden" name="orgId" value={org.id} />
+                  <button
+                    type="submit"
+                    disabled={isPrimary}
+                    aria-label={
+                      isPrimary
+                        ? `${org.name} is your primary brand`
+                        : `Make ${org.name} your primary brand`
+                    }
+                    title={
+                      isPrimary
+                        ? "Primary brand — shown first"
+                        : "Set as primary brand"
+                    }
+                    className="flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-200 hover:bg-[var(--app-overlay-strong)] disabled:cursor-default disabled:hover:bg-transparent"
+                  >
+                    <Star
+                      size={18}
+                      strokeWidth={1.8}
+                      className={
+                        isPrimary
+                          ? "fill-[var(--accent)] text-[var(--accent)]"
+                          : "text-[var(--app-fg-subtle)]"
+                      }
+                    />
+                  </button>
+                </form>
+              </div>
             ))
           )}
           <Row
@@ -104,6 +145,11 @@ export default async function SettingsPage() {
             label="New brand"
           />
         </div>
+        {manageable.length > 1 ? (
+          <p className="px-1 pt-2 text-xs leading-relaxed text-[var(--app-fg-subtle)]">
+            Tap the star to choose which brand shows first in your card list.
+          </p>
+        ) : null}
       </section>
 
       <section>
