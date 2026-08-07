@@ -148,8 +148,29 @@ model Card {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  previousSlugs CardSlugHistory[]
+
   @@unique([orgId, slug])
   @@unique([orgId, ownerUserId])
+}
+
+/**
+ * Public URLs end up printed on QR codes and pasted into signatures, so a
+ * renamed card must not strand them. Every previous slug is kept here and
+ * redirected to the card's current URL.
+ */
+model CardSlugHistory {
+  id   String @id @default(cuid())
+  slug String
+
+  orgId String
+
+  cardId String
+  card   Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([orgId, slug])
 }
 
 model ScannedContact {

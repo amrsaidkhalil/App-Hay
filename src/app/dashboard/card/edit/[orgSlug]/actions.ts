@@ -53,8 +53,18 @@ export async function saveCardAction(formData: FormData) {
   const orgSlug = String(formData.get("orgSlug"));
   const { user, membership } = await requireMembership(orgSlug);
 
-  const rawSlug = String(formData.get("slug") ?? "");
-  const slug = slugify(rawSlug || user.name || user.email);
+  const existing = await prisma.card.findUnique({
+    where: {
+      orgId_ownerUserId: { orgId: membership.orgId, ownerUserId: user.id },
+    },
+    select: { id: true, slug: true },
+  });
+
+  // The slug is a public URL that people scan off a printed QR code, so it must
+  // only change when explicitly edited. Deriving it from the account name on a
+  // blank field silently broke a live card once Google updated the profile name.
+  const rawSlug = slugify(String(formData.get("slug") ?? ""));
+  const slug = rawSlug || existing?.slug || slugify(user.name || user.email);
 
   const socialLinks = JSON.stringify({
     instagram: String(formData.get("instagram") ?? "").trim() || undefined,
@@ -77,13 +87,25 @@ export async function saveCardAction(formData: FormData) {
     socialLinks,
   };
 
-  await prisma.card.upsert({
+  const saved = await prisma.card.upsert({
     where: {
       orgId_ownerUserId: { orgId: membership.orgId, ownerUserId: user.id },
     },
     update: fields,
     create: { ...fields, orgId: membership.orgId, ownerUserId: user.id },
   });
+
+  // Slug changed on an existing card — keep the old one redirecting so a
+  // printed QR code or a link already handed out doesn't dead-end.
+  if (existing && existing.slug !== slug) {
+    await prisma.cardSlugHistory
+      .create({
+        data: { orgId: membership.orgId, cardId: saved.id, slug: existing.slug },
+      })
+      // The old slug may already be recorded (e.g. renamed back and forth) —
+      // that's fine, it still points at this card.
+      .catch(() => undefined);
+  }
 
   redirect(`/dashboard/card/edit/${orgSlug}?saved=1`);
 }

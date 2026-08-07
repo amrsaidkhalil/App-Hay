@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import QRCode from "qrcode";
 import { UserPlus, Wallet, Check, ArrowLeft } from "lucide-react";
 import { getCurrentUser } from "@/lib/dev-session";
@@ -28,7 +28,21 @@ export default async function PublicCardPage({
     where: { slug: cardSlug, org: { slug: orgSlug } },
     include: { org: true, owner: true },
   });
-  if (!card) notFound();
+
+  // Not found under the current slug — it may have been renamed. A printed
+  // QR code or a link already handed out shouldn't dead-end just because the
+  // owner edited their card, so follow the redirect chain instead of 404ing.
+  if (!card) {
+    const org = await prisma.organization.findUnique({ where: { slug: orgSlug } });
+    const history = org
+      ? await prisma.cardSlugHistory.findUnique({
+          where: { orgId_slug: { orgId: org.id, slug: cardSlug } },
+          include: { card: true },
+        })
+      : null;
+    if (history) redirect(`/c/${orgSlug}/${history.card.slug}`);
+    notFound();
+  }
 
   const social = parseSocialLinks(card.socialLinks);
   const baseUrl = await getBaseUrl();
