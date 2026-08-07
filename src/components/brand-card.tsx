@@ -12,6 +12,7 @@ export type BrandCardData = {
   logoUrl?: string | null;
   photoUrl?: string | null;
   primaryColor: string;
+  textColor: string;
   secondaryColor: string;
   headingFont: string;
 };
@@ -23,8 +24,9 @@ function initials(name: string) {
 }
 
 /**
- * The card face. Shared by the dashboard, the editor preview and the public
- * page so a card looks identical everywhere it appears.
+ * The card face — solid brand background, brand text color, accent ring.
+ * Shared by the dashboard, the editor preview and the public page so a card
+ * looks identical everywhere it appears.
  */
 export function BrandCard({
   data,
@@ -39,6 +41,7 @@ export function BrandCard({
 }) {
   const theme = buildCardTheme(
     data.primaryColor,
+    data.textColor,
     data.secondaryColor,
     data.headingFont
   );
@@ -52,25 +55,18 @@ export function BrandCard({
   return (
     <div
       className={cn(
-        "relative isolate overflow-hidden rounded-[1.75rem] text-white shadow-[0_18px_50px_-12px_rgba(0,0,0,0.55)]",
+        "relative overflow-hidden rounded-[1.75rem] shadow-[0_18px_50px_-14px_rgba(0,0,0,0.5)]",
         compact ? "p-5" : "p-6",
         className
       )}
-      style={{ background: theme.background }}
+      style={{ background: theme.background, color: theme.text }}
     >
-      {/* Hairline highlight — gives the face a lit top edge */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-[1.75rem]"
-        style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.14)" }}
-      />
-
       <div className="flex items-start justify-between gap-3">
         {data.logoUrl ? (
           <img
             src={data.logoUrl}
             alt=""
-            className="h-9 w-9 shrink-0 rounded-lg bg-white/10 object-contain p-1"
+            className="h-9 w-9 shrink-0 rounded-lg object-contain"
           />
         ) : (
           <span className="h-9 w-9" aria-hidden />
@@ -89,12 +85,16 @@ export function BrandCard({
           compact ? "mt-4" : "mt-6"
         )}
       >
+        {/* Accent ring around the logo/photo */}
         <span
           className={cn(
-            "flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/[0.12] ring-2",
+            "flex shrink-0 items-center justify-center overflow-hidden rounded-full",
             compact ? "h-16 w-16" : "h-20 w-20"
           )}
-          style={{ ["--tw-ring-color" as string]: theme.hairline }}
+          style={{
+            border: `2.5px solid ${theme.accent}`,
+            backgroundColor: theme.hairline,
+          }}
         >
           {data.photoUrl ? (
             <img
@@ -106,14 +106,12 @@ export function BrandCard({
             <img
               src={data.logoUrl}
               alt=""
-              className="h-full w-full object-contain p-3"
+              className="h-full w-full object-contain p-2.5"
             />
           ) : (
             <span
-              className={cn(
-                "font-semibold text-white/90",
-                compact ? "text-lg" : "text-xl"
-              )}
+              className={cn("font-semibold", compact ? "text-lg" : "text-xl")}
+              style={{ color: theme.text }}
             >
               {initials(data.name)}
             </span>
@@ -122,19 +120,17 @@ export function BrandCard({
 
         <h2
           className={cn(
-            "mt-3 font-semibold leading-tight text-white",
+            "mt-3 font-semibold leading-tight",
             compact ? "text-lg" : "text-2xl"
           )}
-          style={headingStyle}
+          style={{ ...headingStyle, color: theme.text }}
         >
           {data.name}
         </h2>
         {data.jobTitle ? (
           <p
-            className={cn(
-              "mt-1 text-white/70",
-              compact ? "text-[13px]" : "text-sm"
-            )}
+            className={cn("mt-1", compact ? "text-[13px]" : "text-sm")}
+            style={{ color: theme.textMuted }}
           >
             {data.jobTitle}
           </p>
@@ -143,13 +139,18 @@ export function BrandCard({
 
       {qrDataUrl ? (
         <div className={cn("flex justify-center", compact ? "mt-5" : "mt-6")}>
-          <span className="rounded-2xl bg-white p-2.5 shadow-lg">
+          {/* White quiet zone + accent ring — keeps the code scannable on any
+              background while still reading as part of the card. */}
+          <span
+            className="rounded-2xl bg-white p-2.5"
+            style={{ border: `2.5px solid ${theme.accent}` }}
+          >
             <img
               src={qrDataUrl}
               alt={`QR code linking to ${data.name}'s card`}
               width={compact ? 116 : 148}
               height={compact ? 116 : 148}
-              className="block rounded-lg"
+              className="block"
             />
           </span>
         </div>

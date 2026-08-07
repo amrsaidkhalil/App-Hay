@@ -35,6 +35,7 @@ export type CardFormValues = {
 
 type Theme = {
   primaryColor: string;
+  textColor: string;
   secondaryColor: string;
   headingFont: string;
   logoUrl: string | null;
@@ -130,6 +131,7 @@ export function CardEditorForm({
     logoUrl: theme.logoUrl,
     photoUrl: photoUrl || null,
     primaryColor: theme.primaryColor,
+    textColor: theme.textColor,
     secondaryColor: theme.secondaryColor,
     headingFont: theme.headingFont,
   };

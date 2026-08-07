@@ -25,14 +25,19 @@ enum CrmProvider {
 }
 
 model Organization {
-  id             String   @id @default(cuid())
-  slug           String   @unique
-  name           String
-  logoUrl        String?
-  primaryColor   String   @default("#111827")
-  secondaryColor String   @default("#34d399")
-  headingFont    String   @default("Poppins")
-  bodyFont       String   @default("Poppins")
+  id      String  @id @default(cuid())
+  slug    String  @unique
+  name    String
+  logoUrl String?
+
+  // Card palette: primary is the solid card background, textColor is what's
+  // printed on it, secondaryColor is the accent (logo ring, QR modules).
+  primaryColor   String @default("#111827")
+  textColor      String @default("#ffffff")
+  secondaryColor String @default("#34d399")
+
+  headingFont String @default("Poppins")
+  bodyFont    String @default("Poppins")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 

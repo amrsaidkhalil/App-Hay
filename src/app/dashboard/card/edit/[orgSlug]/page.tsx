@@ -64,6 +64,7 @@ export default async function EditCardPage({
         initialPhoto={card?.photoUrl ?? ""}
         theme={{
           primaryColor: org.primaryColor,
+          textColor: org.textColor,
           secondaryColor: org.secondaryColor,
           headingFont: org.headingFont,
           logoUrl: org.logoUrl,

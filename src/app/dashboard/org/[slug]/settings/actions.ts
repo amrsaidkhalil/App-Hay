@@ -54,6 +54,7 @@ export async function saveOrgSettingsAction(formData: FormData) {
       name: String(formData.get("name") ?? "").trim() || undefined,
       logoUrl: safeUrl(formData.get("logoUrl")),
       primaryColor: safeHex(formData.get("primaryColor"), "#111827"),
+      textColor: safeHex(formData.get("textColor"), "#ffffff"),
       secondaryColor: safeHex(formData.get("secondaryColor"), "#34d399"),
       headingFont: FONTS.has(font) ? font : "Poppins",
     },

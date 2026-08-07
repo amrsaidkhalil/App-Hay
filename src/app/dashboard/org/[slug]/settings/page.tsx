@@ -61,6 +61,7 @@ export default async function OrgSettingsPage({
             name: org.name,
             logoUrl: org.logoUrl ?? "",
             primaryColor: org.primaryColor,
+            textColor: org.textColor,
             secondaryColor: org.secondaryColor,
             headingFont: org.headingFont,
           }}

@@ -4,6 +4,7 @@ import { Plus, Sparkles } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/prisma";
 import { getBaseUrl } from "@/lib/site-url";
+import { buildCardTheme } from "@/lib/brand";
 import { BrandCard } from "@/components/brand-card";
 import { CardActions } from "@/components/card-actions";
 
@@ -25,15 +26,22 @@ export default async function DashboardPage() {
   const displayName = user.name ?? user.email;
 
   // Pre-render each card's QR on the server so the grid paints in one pass.
+  // Modules use the org's accent, darkened by buildCardTheme until it still scans.
   const qrByCardId = new Map<string, string>(
     await Promise.all(
       cards.map(async (card) => {
         const org = memberships.find((m) => m.orgId === card.orgId)?.org;
         const url = `${baseUrl}/c/${org?.slug ?? ""}/${card.slug}`;
+        const theme = buildCardTheme(
+          org?.primaryColor ?? "#111827",
+          org?.textColor ?? "#ffffff",
+          org?.secondaryColor ?? "#34d399",
+          org?.headingFont ?? "Poppins"
+        );
         const qr = await QRCode.toDataURL(url, {
           margin: 0,
           width: 320,
-          color: { dark: "#0b1120", light: "#ffffff" },
+          color: { dark: theme.qrDark, light: "#ffffff" },
         });
         return [card.id, qr] as const;
       })
@@ -74,6 +82,7 @@ export default async function DashboardPage() {
                     logoUrl: org.logoUrl,
                     photoUrl: card.photoUrl,
                     primaryColor: org.primaryColor,
+                    textColor: org.textColor,
                     secondaryColor: org.secondaryColor,
                     headingFont: org.headingFont,
                   }}

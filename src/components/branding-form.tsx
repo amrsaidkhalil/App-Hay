@@ -1,13 +1,25 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Check, ImagePlus, Loader2, Trash2, Type } from "lucide-react";
+import {
+  Check,
+  ImagePlus,
+  Loader2,
+  Trash2,
+  Type,
+  AlertTriangle,
+} from "lucide-react";
 import { BrandCard } from "./brand-card";
+import { contrastRatio } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
 // A starting palette so a brand can be set up in one tap. Custom hex is always
 // available below, so this is a shortcut, not a limit.
 const PRESETS = [
+  "#0a0a0a",
+  "#1c1917",
+  "#1e293b",
+  "#ffffff",
   "#e9b216",
   "#f97316",
   "#dc2626",
@@ -15,10 +27,7 @@ const PRESETS = [
   "#7c3aed",
   "#2563eb",
   "#0891b2",
-  "#0f766e",
   "#16a34a",
-  "#78716c",
-  "#1e293b",
 ];
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
@@ -99,6 +108,36 @@ function SwatchRow({
   );
 }
 
+/**
+ * Live contrast readout. The user now picks the background and text colors
+ * directly, so nothing guarantees they're readable — this surfaces the problem
+ * while they're choosing instead of after the card is printed.
+ */
+function ContrastNotice({ bg, text }: { bg: string; text: string }) {
+  const ratio = contrastRatio(bg, text);
+  const ok = ratio >= 4.5;
+  return (
+    <p
+      className={cn(
+        "mt-3 flex items-start gap-2 rounded-xl px-3.5 py-2.5 text-xs leading-relaxed",
+        ok ? "bg-emerald-400/12 text-emerald-300" : "bg-amber-400/12 text-amber-200"
+      )}
+    >
+      {ok ? (
+        <Check size={14} strokeWidth={2.4} className="mt-0.5 shrink-0" aria-hidden />
+      ) : (
+        <AlertTriangle size={14} strokeWidth={2.2} className="mt-0.5 shrink-0" aria-hidden />
+      )}
+      <span>
+        Text contrast {ratio.toFixed(1)}:1 —{" "}
+        {ok
+          ? "easy to read."
+          : "too low. Aim for 4.5:1 so the card stays legible in sunlight."}
+      </span>
+    </p>
+  );
+}
+
 export function BrandingForm({
   orgSlug,
   initial,
@@ -114,6 +153,7 @@ export function BrandingForm({
     name: string;
     logoUrl: string;
     primaryColor: string;
+    textColor: string;
     secondaryColor: string;
     headingFont: string;
   };
@@ -125,6 +165,7 @@ export function BrandingForm({
   const [name, setName] = useState(initial.name);
   const [logoUrl, setLogoUrl] = useState(initial.logoUrl);
   const [primary, setPrimary] = useState(initial.primaryColor);
+  const [textColor, setTextColor] = useState(initial.textColor);
   const [secondary, setSecondary] = useState(initial.secondaryColor);
   const [headingFont, setHeadingFont] = useState(initial.headingFont);
   const [uploading, setUploading] = useState(false);
@@ -157,6 +198,7 @@ export function BrandingForm({
         <input type="hidden" name="slug" value={orgSlug} />
         <input type="hidden" name="logoUrl" value={logoUrl} />
         <input type="hidden" name="primaryColor" value={primary} />
+        <input type="hidden" name="textColor" value={textColor} />
         <input type="hidden" name="secondaryColor" value={secondary} />
         <input type="hidden" name="headingFont" value={headingFont} />
 
@@ -254,12 +296,26 @@ export function BrandingForm({
           ) : null}
         </div>
 
-        <SwatchRow label="Primary color" value={primary} onChange={setPrimary} />
-        <SwatchRow
-          label="Secondary color"
-          value={secondary}
-          onChange={setSecondary}
-        />
+        <div>
+          <SwatchRow
+            label="Card background"
+            value={primary}
+            onChange={setPrimary}
+          />
+        </div>
+
+        <div>
+          <SwatchRow label="Text color" value={textColor} onChange={setTextColor} />
+          <ContrastNotice bg={primary} text={textColor} />
+        </div>
+
+        <div>
+          <SwatchRow
+            label="Accent (logo ring + QR)"
+            value={secondary}
+            onChange={setSecondary}
+          />
+        </div>
 
         <div>
           <span className="mb-2 block text-[13px] font-medium text-[var(--app-fg-muted)]">
@@ -311,6 +367,7 @@ export function BrandingForm({
             logoUrl: logoUrl || null,
             photoUrl: null,
             primaryColor: primary,
+            textColor,
             secondaryColor: secondary,
             headingFont,
           }}

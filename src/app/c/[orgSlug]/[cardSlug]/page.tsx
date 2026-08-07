@@ -9,6 +9,7 @@ import {
   googleWalletConfigured,
   buildGoogleWalletSaveUrl,
 } from "@/lib/wallet/google";
+import { buildCardTheme } from "@/lib/brand";
 import { BrandCard } from "@/components/brand-card";
 import { buildContactRows, ContactRow } from "@/components/contact-rows";
 import { SOCIAL_GLYPHS } from "@/components/social-icons";
@@ -30,10 +31,16 @@ export default async function PublicCardPage({
   const social = parseSocialLinks(card.socialLinks);
   const baseUrl = await getBaseUrl();
   const pageUrl = `${baseUrl}/c/${orgSlug}/${cardSlug}`;
+  const theme = buildCardTheme(
+    card.org.primaryColor,
+    card.org.textColor,
+    card.org.secondaryColor,
+    card.org.headingFont
+  );
   const qrDataUrl = await QRCode.toDataURL(pageUrl, {
     margin: 0,
     width: 380,
-    color: { dark: "#0b1120", light: "#ffffff" },
+    color: { dark: theme.qrDark, light: "#ffffff" },
   });
 
   const displayName = card.owner.name ?? card.owner.email;
@@ -65,6 +72,7 @@ export default async function PublicCardPage({
           logoUrl: card.org.logoUrl,
           photoUrl: card.photoUrl,
           primaryColor: card.org.primaryColor,
+          textColor: card.org.textColor,
           secondaryColor: card.org.secondaryColor,
           headingFont: card.org.headingFont,
         }}

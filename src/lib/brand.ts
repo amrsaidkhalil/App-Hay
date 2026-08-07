@@ -68,12 +68,18 @@ export function readableOn(bg: string) {
 }
 
 export type CardTheme = {
-  /** Full CSS background for the card face. */
+  /** Solid card background. */
   background: string;
-  /** Brand color lightened enough to read as an accent on the dark face. */
+  /** Text printed on the card. */
+  text: string;
+  /** Accent — logo ring and QR modules. */
   accent: string;
-  /** Ring/border color for avatars and chips. */
+  /** Muted version of the text color, for the secondary line. */
+  textMuted: string;
+  /** Hairline border that reads against the background either way. */
   hairline: string;
+  /** QR module color, darkened if needed so the code still scans. */
+  qrDark: string;
   headingFont: string;
 };
 
@@ -82,35 +88,56 @@ export type CardTheme = {
  * Every stop is anchored in near-black, so white text clears 4.5:1 regardless
  * of how light the org's chosen brand color is.
  */
+/**
+ * Build the card face from three explicit brand colors: a solid background,
+ * a text color, and an accent.
+ *
+ * Two things get corrected rather than trusted:
+ *  - The accent is nudged until it's actually visible against the background.
+ *    A brand's accent can legitimately sit very close to its background color,
+ *    which would make the logo ring invisible.
+ *  - The QR modules are darkened until they clear 7:1 against the white quiet
+ *    zone. Camera scanners need real contrast, and a pale accent would produce
+ *    a code that looks right but won't scan — a silent failure in front of the
+ *    person you just handed your phone to.
+ */
 export function buildCardTheme(
   primary: string,
+  text: string,
   secondary: string,
   headingFont: string
 ): CardTheme {
-  // Keep the base near-neutral. Tinting the whole face with a brand color turns
-  // warm hues muddy (gold + black = olive), so the brand reads as *light* cast
-  // across a dark card instead of a wash through it.
-  const base = mix(primary, CANVAS_INK, 0.9);
-  const baseFar = mix(secondary, CANVAS_INK, 0.93);
+  // These come straight from DB rows. A missing value should degrade to a
+  // readable default, not throw and take down the whole card page.
+  const background = primary || "#111827";
+  text = text || "#ffffff";
+  secondary = secondary || "#34d399";
+  headingFont = headingFont || "Poppins";
 
-  // Lift the brand hue until it can carry small text on the dark face.
-  let accent = primary;
+  let accent = secondary;
   let guard = 0;
-  while (contrastRatio(accent, base) < 4.5 && guard < 14) {
-    accent = mix(accent, "#ffffff", 0.1);
+  while (contrastRatio(accent, background) < 1.9 && guard < 16) {
+    // Push away from the background: lighten a dark bg's accent, darken a light one's.
+    accent = mix(accent, luminance(background) > 0.4 ? "#000000" : "#ffffff", 0.09);
     guard += 1;
   }
 
+  let qrDark = secondary;
+  guard = 0;
+  while (contrastRatio(qrDark, "#ffffff") < 7 && guard < 20) {
+    qrDark = mix(qrDark, CANVAS_INK, 0.12);
+    guard += 1;
+  }
+
+  const towardBg = mix(text, background, 0.32);
+
   return {
-    background: [
-      // Brand glow, top-right — saturated but tightly contained.
-      `radial-gradient(85% 60% at 88% 2%, ${mix(primary, CANVAS_INK, 0.3)} 0%, transparent 62%)`,
-      // Secondary counter-glow, bottom-left, for depth.
-      `radial-gradient(70% 55% at 4% 100%, ${mix(secondary, CANVAS_INK, 0.62)} 0%, transparent 60%)`,
-      `linear-gradient(160deg, ${base} 0%, ${CANVAS_INK} 52%, ${baseFar} 100%)`,
-    ].join(", "),
+    background,
+    text,
     accent,
-    hairline: "rgba(255,255,255,0.16)",
+    textMuted: towardBg,
+    hairline: mix(text, background, 0.72),
+    qrDark,
     headingFont,
   };
 }
