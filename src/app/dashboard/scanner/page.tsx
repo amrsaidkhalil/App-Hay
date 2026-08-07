@@ -1,3 +1,4 @@
+import { ScanLine } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/prisma";
 import { scannerConfigured } from "@/lib/scan-card";
@@ -15,21 +16,33 @@ export default async function ScannerPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">AI Contact Scanner</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Photograph a physical business card and it&apos;ll be parsed into a
-          lead automatically.
+        <h1 className="text-2xl font-semibold tracking-tight text-white">
+          Scan a card
+        </h1>
+        <p className="mt-1 text-sm text-[var(--app-fg-muted)]">
+          Photograph a paper business card and it becomes a contact.
         </p>
       </div>
 
       {!scannerConfigured ? (
-        <p className="rounded-xl border border-dashed border-amber-300 bg-amber-50 p-6 text-sm text-amber-800">
-          Not configured yet. Set <code className="font-mono">ANTHROPIC_API_KEY</code>{" "}
-          in <code className="font-mono">.env</code> to enable the scanner.
-        </p>
+        <div className="rounded-2xl border border-dashed border-amber-400/40 bg-amber-400/[0.06] px-6 py-10 text-center">
+          <span
+            className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-400/10 text-amber-300"
+            aria-hidden
+          >
+            <ScanLine size={24} strokeWidth={1.6} />
+          </span>
+          <p className="mt-4 text-[15px] font-medium text-white">
+            Scanner isn&apos;t set up yet
+          </p>
+          <p className="mx-auto mt-1 max-w-xs text-sm leading-relaxed text-[var(--app-fg-muted)]">
+            Add an <code className="font-mono text-amber-200">ANTHROPIC_API_KEY</code>{" "}
+            to switch this on.
+          </p>
+        </div>
       ) : memberships.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">
-          You need to belong to an organization before saving leads.
+        <p className="rounded-2xl border border-dashed border-[var(--app-border-strong)] p-6 text-sm text-[var(--app-fg-muted)]">
+          You need to belong to an organization before saving contacts.
         </p>
       ) : (
         <ScannerForm

@@ -1,6 +1,11 @@
 import Link from "next/link";
+import QRCode from "qrcode";
+import { Plus, Sparkles } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/prisma";
+import { getBaseUrl } from "@/lib/site-url";
+import { BrandCard } from "@/components/brand-card";
+import { CardActions } from "@/components/card-actions";
 
 export default async function DashboardPage() {
   const user = await requireUser();
@@ -13,92 +18,120 @@ export default async function DashboardPage() {
 
   const cards = await prisma.card.findMany({
     where: { ownerUserId: user.id },
-    include: { org: true },
   });
-
   const cardByOrgId = new Map(cards.map((card) => [card.orgId, card]));
 
+  const baseUrl = await getBaseUrl();
+  const displayName = user.name ?? user.email;
+
+  // Pre-render each card's QR on the server so the grid paints in one pass.
+  const qrByCardId = new Map<string, string>(
+    await Promise.all(
+      cards.map(async (card) => {
+        const org = memberships.find((m) => m.orgId === card.orgId)?.org;
+        const url = `${baseUrl}/c/${org?.slug ?? ""}/${card.slug}`;
+        const qr = await QRCode.toDataURL(url, {
+          margin: 0,
+          width: 320,
+          color: { dark: "#0b1120", light: "#ffffff" },
+        });
+        return [card.id, qr] as const;
+      })
+    )
+  );
+
+  const withCards = memberships.filter((m) => cardByOrgId.has(m.orgId));
+  const withoutCards = memberships.filter((m) => !cardByOrgId.has(m.orgId));
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-slate-900">My cards</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          One digital card per brand you belong to. Share the public link or
-          QR code to hand someone your contact instantly.
+    <div className="space-y-8">
+      <header>
+        <h1 className="text-2xl font-semibold tracking-tight text-white">
+          My cards
+        </h1>
+        <p className="mt-1 text-sm text-[var(--app-fg-muted)]">
+          One card per brand. Share the link or let someone scan the QR.
         </p>
-      </div>
+      </header>
 
       {memberships.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">
+        <p className="rounded-2xl border border-dashed border-[var(--app-border-strong)] p-8 text-center text-sm text-[var(--app-fg-muted)]">
           You&apos;re not a member of any organization yet.
         </p>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {memberships.map(({ org, role }) => {
-            const card = cardByOrgId.get(org.id);
+      ) : null}
+
+      {withCards.length > 0 ? (
+        <div className="grid gap-6 sm:grid-cols-2">
+          {withCards.map(({ org }) => {
+            const card = cardByOrgId.get(org.id)!;
             return (
-              <div
-                key={org.id}
-                className="overflow-hidden rounded-xl border border-slate-200 bg-white"
-              >
-                <div
-                  className="h-2"
-                  style={{ backgroundColor: org.primaryColor }}
+              <section key={org.id}>
+                <BrandCard
+                  data={{
+                    name: displayName,
+                    jobTitle: card.jobTitle,
+                    orgName: org.name,
+                    logoUrl: org.logoUrl,
+                    photoUrl: card.photoUrl,
+                    primaryColor: org.primaryColor,
+                    secondaryColor: org.secondaryColor,
+                    headingFont: org.headingFont,
+                  }}
+                  qrDataUrl={qrByCardId.get(card.id)}
+                  size="sm"
                 />
-                <div className="p-5">
-                  <div className="flex items-center justify-between">
-                    <h2 className="font-semibold text-slate-900">{org.name}</h2>
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
-                      {role}
-                    </span>
-                  </div>
-
-                  {card ? (
-                    <div className="mt-4 space-y-2">
-                      <p className="text-sm text-slate-500">
-                        /c/{org.slug}/{card.slug}
-                      </p>
-                      <div className="flex gap-2">
-                        <Link
-                          href={`/dashboard/card/edit/${org.slug}`}
-                          className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-700"
-                        >
-                          Edit card
-                        </Link>
-                        <Link
-                          href={`/c/${org.slug}/${card.slug}`}
-                          target="_blank"
-                          className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
-                        >
-                          View public page
-                        </Link>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="mt-4">
-                      <Link
-                        href={`/dashboard/card/edit/${org.slug}`}
-                        className="inline-block rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-700"
-                      >
-                        Create your card
-                      </Link>
-                    </div>
-                  )}
-
-                  {(role === "OWNER" || role === "ADMIN") && (
-                    <Link
-                      href={`/dashboard/org/${org.slug}/settings`}
-                      className="mt-3 block text-xs text-slate-400 underline-offset-2 hover:underline"
-                    >
-                      Brand settings
-                    </Link>
-                  )}
-                </div>
-              </div>
+                <CardActions
+                  publicPath={`/c/${org.slug}/${card.slug}`}
+                  editPath={`/dashboard/card/edit/${org.slug}`}
+                  name={displayName}
+                  orgName={org.name}
+                />
+              </section>
             );
           })}
         </div>
-      )}
+      ) : null}
+
+      {withoutCards.length > 0 ? (
+        <section>
+          <h2 className="px-1 pb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--app-fg-subtle)]">
+            Brands without a card yet
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {withoutCards.map(({ org, role }) => (
+              <Link
+                key={org.id}
+                href={`/dashboard/card/edit/${org.slug}`}
+                className="group flex min-h-[72px] items-center gap-4 rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-4 transition-colors duration-200 hover:border-[var(--app-border-strong)] hover:bg-white/[0.04]"
+              >
+                <span
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 ring-white/10"
+                  style={{
+                    background: `linear-gradient(135deg, ${org.primaryColor}, ${org.secondaryColor})`,
+                  }}
+                  aria-hidden
+                >
+                  <Sparkles size={18} strokeWidth={1.9} className="text-white/90" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[15px] font-medium text-white">
+                    {org.name}
+                  </span>
+                  <span className="text-xs text-[var(--app-fg-subtle)]">
+                    {role}
+                  </span>
+                </span>
+                <span
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/[0.07] text-white transition-colors duration-200 group-hover:bg-[var(--accent)]"
+                  aria-hidden
+                >
+                  <Plus size={18} strokeWidth={2.2} />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

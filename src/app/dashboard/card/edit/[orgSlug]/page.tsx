@@ -1,9 +1,12 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft, Check } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/prisma";
 import { parseSocialLinks } from "@/lib/utils";
+import { blobConfigured } from "@/lib/upload";
 import { CardEditorForm } from "@/components/card-editor-form";
-import { saveCardAction } from "./actions";
+import { saveCardAction, uploadCardPhotoAction } from "./actions";
 
 export default async function EditCardPage({
   params,
@@ -26,34 +29,46 @@ export default async function EditCardPage({
   });
 
   const social = parseSocialLinks(card?.socialLinks ?? "{}");
+  const { org } = membership;
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">
-          {membership.org.name} card
+        <Link
+          href="/dashboard"
+          className="inline-flex min-h-[44px] items-center gap-1.5 text-sm text-[var(--app-fg-muted)] transition-colors duration-200 hover:text-white"
+        >
+          <ArrowLeft size={16} strokeWidth={1.9} aria-hidden />
+          My cards
+        </Link>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-white">
+          {org.name} card
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Edits show up instantly in the preview on the right.
+        <p className="mt-1 text-sm text-[var(--app-fg-muted)]">
+          Changes show in the preview instantly.
         </p>
         {saved ? (
-          <p className="mt-2 inline-block rounded-lg bg-emerald-50 px-3 py-1.5 text-sm text-emerald-700">
-            Saved.
+          <p className="mt-3 inline-flex items-center gap-2 rounded-xl bg-emerald-400/12 px-3.5 py-2 text-sm text-emerald-300">
+            <Check size={15} strokeWidth={2.4} aria-hidden />
+            Card saved
           </p>
         ) : null}
       </div>
 
       <CardEditorForm
         orgSlug={orgSlug}
-        orgName={membership.org.name}
+        orgName={org.name}
+        ownerName={user.name ?? user.email}
         cardSlug={card?.slug ?? ""}
+        canUpload={blobConfigured}
+        initialPhoto={card?.photoUrl ?? ""}
         theme={{
-          primaryColor: membership.org.primaryColor,
-          secondaryColor: membership.org.secondaryColor,
-          headingFont: membership.org.headingFont,
+          primaryColor: org.primaryColor,
+          secondaryColor: org.secondaryColor,
+          headingFont: org.headingFont,
+          logoUrl: org.logoUrl,
         }}
         initial={{
-          name: user.name ?? user.email,
           jobTitle: card?.jobTitle ?? "",
           phone: card?.phone ?? "",
           whatsapp: card?.whatsapp ?? "",
@@ -65,6 +80,7 @@ export default async function EditCardPage({
           facebook: social.facebook ?? "",
         }}
         saveAction={saveCardAction}
+        uploadAction={uploadCardPhotoAction}
       />
     </div>
   );

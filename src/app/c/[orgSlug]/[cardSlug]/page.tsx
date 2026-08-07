@@ -1,18 +1,18 @@
 import { notFound } from "next/navigation";
 import QRCode from "qrcode";
+import { UserPlus, Wallet, Check } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { parseSocialLinks } from "@/lib/utils";
 import { getBaseUrl } from "@/lib/site-url";
 import { appleWalletConfigured } from "@/lib/wallet/apple";
-import { googleWalletConfigured, buildGoogleWalletSaveUrl } from "@/lib/wallet/google";
+import {
+  googleWalletConfigured,
+  buildGoogleWalletSaveUrl,
+} from "@/lib/wallet/google";
+import { BrandCard } from "@/components/brand-card";
+import { buildContactRows, ContactRow } from "@/components/contact-rows";
+import { SOCIAL_GLYPHS } from "@/components/social-icons";
 import { shareContactBackAction } from "./actions";
-
-const SOCIAL_LABELS: Record<string, string> = {
-  instagram: "Instagram",
-  linkedin: "LinkedIn",
-  twitter: "X / Twitter",
-  facebook: "Facebook",
-};
 
 export default async function PublicCardPage({
   params,
@@ -31,20 +31,18 @@ export default async function PublicCardPage({
   const baseUrl = await getBaseUrl();
   const pageUrl = `${baseUrl}/c/${orgSlug}/${cardSlug}`;
   const qrDataUrl = await QRCode.toDataURL(pageUrl, {
-    margin: 1,
-    width: 240,
-    color: { dark: card.org.primaryColor, light: "#ffffff" },
+    margin: 0,
+    width: 380,
+    color: { dark: "#0b1120", light: "#ffffff" },
   });
 
-  const headingStyle =
-    card.org.headingFont === "Poetsen One"
-      ? { fontFamily: "var(--font-poetsen)" }
-      : undefined;
+  const displayName = card.owner.name ?? card.owner.email;
+  const rows = buildContactRows(card);
 
   const googleWalletUrl = googleWalletConfigured
     ? await buildGoogleWalletSaveUrl({
         cardId: card.id,
-        fullName: card.owner.name ?? card.owner.email,
+        fullName: displayName,
         jobTitle: card.jobTitle,
         orgName: card.org.name,
         phone: card.phone,
@@ -55,128 +53,133 @@ export default async function PublicCardPage({
     : null;
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-md flex-col px-4 py-10">
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div
-          className="flex h-32 items-end p-6"
-          style={{
-            background: `linear-gradient(135deg, ${card.org.primaryColor}, ${card.org.secondaryColor})`,
-          }}
-        >
-          <div className="h-20 w-20 rounded-full border-4 border-white bg-slate-200" />
-        </div>
+    <div
+      className="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-10"
+      style={{ paddingTop: "calc(var(--safe-top) + 1.5rem)" }}
+    >
+      <BrandCard
+        data={{
+          name: displayName,
+          jobTitle: card.jobTitle,
+          orgName: card.org.name,
+          logoUrl: card.org.logoUrl,
+          photoUrl: card.photoUrl,
+          primaryColor: card.org.primaryColor,
+          secondaryColor: card.org.secondaryColor,
+          headingFont: card.org.headingFont,
+        }}
+        qrDataUrl={qrDataUrl}
+      />
 
-        <div className="space-y-4 p-6">
-          <div>
-            <h1 className="text-xl font-semibold text-slate-900" style={headingStyle}>
-              {card.owner.name ?? card.owner.email}
-            </h1>
-            <p className="text-sm text-slate-500">
-              {card.jobTitle ?? ""} {card.jobTitle ? "·" : ""} {card.org.name}
-            </p>
-          </div>
+      <a href={`/c/${orgSlug}/${cardSlug}/vcard`} className="btn-primary mt-5 w-full">
+        <UserPlus size={18} strokeWidth={1.9} aria-hidden />
+        Save to contacts
+      </a>
 
-          <dl className="space-y-1.5 text-sm text-slate-700">
-            {card.phone && <div>📞 {card.phone}</div>}
-            {card.whatsapp && <div>💬 {card.whatsapp} (WhatsApp)</div>}
-            {card.email && <div>✉️ {card.email}</div>}
-            {card.website && <div>🌐 {card.website}</div>}
-          </dl>
-
-          {Object.keys(social).length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(social).map(([key, url]) =>
-                url ? (
-                  <a
-                    key={key}
-                    href={url}
-                    target="_blank"
-                    className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600 transition hover:bg-slate-200"
-                  >
-                    {SOCIAL_LABELS[key] ?? key}
-                  </a>
-                ) : null
-              )}
-            </div>
-          )}
-
-          <a
-            href={`/c/${orgSlug}/${cardSlug}/vcard`}
-            className="block w-full rounded-lg py-2.5 text-center text-sm font-medium text-white"
-            style={{ backgroundColor: card.org.primaryColor }}
-          >
-            Save contact
+      <div className="mt-2.5 grid grid-cols-2 gap-2.5">
+        {googleWalletUrl ? (
+          <a href={googleWalletUrl} className="btn-ghost text-sm">
+            <Wallet size={16} strokeWidth={1.8} aria-hidden />
+            Google Wallet
           </a>
-
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              disabled
-              title={
-                appleWalletConfigured
-                  ? "Certs are set, but pass generation isn't implemented yet"
-                  : "Coming soon — needs an Apple Developer Pass Type ID certificate"
-              }
-              className="cursor-not-allowed rounded-lg border border-slate-200 py-2 text-xs font-medium text-slate-400"
-            >
-              Apple Wallet (soon)
-            </button>
-            {googleWalletUrl ? (
-              <a
-                href={googleWalletUrl}
-                className="flex items-center justify-center rounded-lg border border-slate-200 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
-              >
-                Add to Google Wallet
-              </a>
-            ) : (
-              <button
-                type="button"
-                disabled
-                title="Coming soon — needs a Google Wallet Issuer account"
-                className="cursor-not-allowed rounded-lg border border-slate-200 py-2 text-xs font-medium text-slate-400"
-              >
-                Google Wallet (soon)
-              </button>
-            )}
-          </div>
-
-          <div className="flex justify-center pt-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={qrDataUrl}
-              alt="QR code linking to this card"
-              width={160}
-              height={160}
-              className="rounded-lg border border-slate-100"
-            />
-          </div>
-        </div>
+        ) : (
+          <button
+            type="button"
+            disabled
+            title="Coming soon — needs a Google Wallet Issuer account"
+            className="btn-ghost cursor-not-allowed text-sm opacity-45"
+          >
+            <Wallet size={16} strokeWidth={1.8} aria-hidden />
+            Google Wallet
+          </button>
+        )}
+        <button
+          type="button"
+          disabled
+          title={
+            appleWalletConfigured
+              ? "Certificates are set, but pass generation isn't implemented yet"
+              : "Coming soon — needs an Apple Developer Pass Type ID certificate"
+          }
+          className="btn-ghost cursor-not-allowed text-sm opacity-45"
+        >
+          <Wallet size={16} strokeWidth={1.8} aria-hidden />
+          Apple Wallet
+        </button>
       </div>
 
-      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 text-sm">
-        <p className="font-medium text-slate-700">Share your info back</p>
+      {rows.length > 0 ? (
+        <div className="mt-6 divide-y divide-[var(--app-border)] overflow-hidden rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)]">
+          {rows.map((row) => (
+            <ContactRow key={row.label} row={row} />
+          ))}
+        </div>
+      ) : null}
+
+      {Object.values(social).some(Boolean) ? (
+        <div className="mt-4 flex flex-wrap justify-center gap-2.5">
+          {Object.entries(social).map(([key, url]) => {
+            if (!url) return null;
+            const meta = SOCIAL_GLYPHS[key];
+            if (!meta) return null;
+            const { Glyph, label } = meta;
+            return (
+              <a
+                key={key}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                title={label}
+                className="flex h-12 w-12 items-center justify-center rounded-full border border-[var(--app-border-strong)] text-[var(--app-fg-muted)] transition-colors duration-200 hover:bg-white/[0.06] hover:text-white"
+              >
+                <Glyph size={18} />
+              </a>
+            );
+          })}
+        </div>
+      ) : null}
+
+      <div className="mt-8 rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-5">
+        <h2 className="text-[15px] font-semibold text-white">
+          Share your details back
+        </h2>
         {shared ? (
-          <p className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-emerald-700">
-            Thanks — sent.
+          <p className="mt-3 flex items-center gap-2 rounded-xl bg-emerald-400/12 px-4 py-3 text-sm text-emerald-300">
+            <Check size={16} strokeWidth={2.2} aria-hidden />
+            Thanks — {displayName.split(" ")[0]} has your details.
           </p>
         ) : (
-          <form action={shareContactBackAction} className="mt-3 space-y-2">
+          <form action={shareContactBackAction} className="mt-4 space-y-2.5">
             <input type="hidden" name="cardId" value={card.id} />
             <input type="hidden" name="orgSlug" value={orgSlug} />
             <input type="hidden" name="cardSlug" value={cardSlug} />
-            <input name="name" placeholder="Your name" className="input" required />
-            <input name="company" placeholder="Company" className="input" />
-            <input name="email" type="email" placeholder="Email" className="input" />
-            <input name="phone" placeholder="Phone" className="input" />
-            <button
-              type="submit"
-              className="w-full rounded-lg bg-slate-900 py-2 text-sm font-medium text-white"
-            >
-              Send
+            <label className="block">
+              <span className="sr-only">Your name</span>
+              <input name="name" placeholder="Your name" className="input" required />
+            </label>
+            <label className="block">
+              <span className="sr-only">Company</span>
+              <input name="company" placeholder="Company" className="input" />
+            </label>
+            <label className="block">
+              <span className="sr-only">Email</span>
+              <input name="email" type="email" placeholder="Email" className="input" />
+            </label>
+            <label className="block">
+              <span className="sr-only">Phone</span>
+              <input name="phone" type="tel" placeholder="Phone" className="input" />
+            </label>
+            <button type="submit" className="btn-primary w-full">
+              Send my details
             </button>
           </form>
         )}
       </div>
+
+      <p className="mt-8 text-center text-xs text-[var(--app-fg-subtle)]">
+        {card.org.name}
+      </p>
     </div>
   );
 }

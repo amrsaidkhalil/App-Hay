@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import localFont from "next/font/local";
 import { RegisterServiceWorker } from "@/components/register-service-worker";
@@ -31,13 +31,21 @@ export const metadata: Metadata = {
   },
 };
 
+// Tints the iOS status bar / Android chrome to match the app shell.
+export const viewport: Viewport = {
+  themeColor: "#0b1120",
+  // Let the shell paint into the notch/home-indicator area; fixed bars inside
+  // handle their own safe-area padding.
+  viewportFit: "cover",
+};
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
       className={`${poppins.variable} ${poetsenOne.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900">
+      <body className="flex min-h-full flex-col bg-[var(--app-bg)] text-[var(--app-fg)]">
         <RegisterServiceWorker />
         {children}
       </body>

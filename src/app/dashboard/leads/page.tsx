@@ -1,9 +1,13 @@
+import { Download, ScanLine, UserPlus, Users } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/prisma";
 
-const SOURCE_LABELS: Record<string, string> = {
-  AI_SCAN: "AI scan",
-  CARD_INBOUND: "Shared via card",
+const SOURCE_META: Record<
+  string,
+  { label: string; Icon: typeof ScanLine }
+> = {
+  AI_SCAN: { label: "Scanned", Icon: ScanLine },
+  CARD_INBOUND: { label: "Shared with you", Icon: UserPlus },
 };
 
 export default async function LeadsPage() {
@@ -23,76 +27,103 @@ export default async function LeadsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Leads</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Every contact captured by the scanner or shared through a public
-            card page.
+          <h1 className="text-2xl font-semibold tracking-tight text-white">
+            Contacts
+          </h1>
+          <p className="mt-1 text-sm text-[var(--app-fg-muted)]">
+            {contacts.length === 0
+              ? "Everyone you capture will land here."
+              : `${contacts.length} contact${contacts.length === 1 ? "" : "s"} collected.`}
           </p>
         </div>
-        <div className="flex gap-2">
-          <a
-            href="/dashboard/leads/export"
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
-          >
+        {contacts.length > 0 ? (
+          <a href="/dashboard/leads/export" className="btn-ghost text-sm">
+            <Download size={16} strokeWidth={1.8} aria-hidden />
             Export CSV
           </a>
-          <button
-            type="button"
-            disabled
-            title="Coming soon — needs a Google OAuth client for Contacts sync"
-            className="cursor-not-allowed rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-400"
-          >
-            Sync to Google Contacts
-          </button>
-        </div>
+        ) : null}
       </div>
 
       {contacts.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">
-          No leads yet. Scan a business card or share your public card link to
-          start collecting contacts.
-        </p>
-      ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-              <tr>
-                <th className="px-4 py-2.5">Name</th>
-                <th className="px-4 py-2.5">Company</th>
-                <th className="px-4 py-2.5">Contact</th>
-                <th className="px-4 py-2.5">Org</th>
-                <th className="px-4 py-2.5">Source</th>
-                <th className="px-4 py-2.5">Captured</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {contacts.map((c) => (
-                <tr key={c.id}>
-                  <td className="px-4 py-2.5">
-                    <div className="font-medium text-slate-900">{c.name}</div>
-                    {c.jobTitle && (
-                      <div className="text-xs text-slate-400">{c.jobTitle}</div>
-                    )}
-                  </td>
-                  <td className="px-4 py-2.5 text-slate-600">{c.company ?? "—"}</td>
-                  <td className="px-4 py-2.5 text-slate-600">
-                    {c.email ?? "—"}
-                    {c.phone && <div className="text-xs text-slate-400">{c.phone}</div>}
-                  </td>
-                  <td className="px-4 py-2.5 text-slate-600">{c.org.name}</td>
-                  <td className="px-4 py-2.5 text-slate-600">
-                    {SOURCE_LABELS[c.source] ?? c.source}
-                  </td>
-                  <td className="px-4 py-2.5 text-slate-400">
-                    {c.createdAt.toLocaleDateString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="rounded-2xl border border-dashed border-[var(--app-border-strong)] px-6 py-14 text-center">
+          <span
+            className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/[0.05] text-[var(--app-fg-subtle)]"
+            aria-hidden
+          >
+            <Users size={24} strokeWidth={1.6} />
+          </span>
+          <p className="mt-4 text-[15px] font-medium text-white">
+            No contacts yet
+          </p>
+          <p className="mx-auto mt-1 max-w-xs text-sm leading-relaxed text-[var(--app-fg-muted)]">
+            Scan a business card, or share your card so people can send their
+            details back.
+          </p>
         </div>
+      ) : (
+        <ul className="divide-y divide-[var(--app-border)] overflow-hidden rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)]">
+          {contacts.map((c) => {
+            const meta = SOURCE_META[c.source] ?? {
+              label: c.source,
+              Icon: Users,
+            };
+            const { Icon } = meta;
+            return (
+              <li key={c.id} className="flex items-start gap-3.5 px-4 py-4">
+                <span
+                  className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/[0.07] text-[var(--app-fg-muted)]"
+                  aria-hidden
+                >
+                  <Icon size={17} strokeWidth={1.8} />
+                </span>
+
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[15px] font-medium text-white">
+                    {c.name ?? "Unnamed contact"}
+                  </p>
+                  {c.jobTitle || c.company ? (
+                    <p className="truncate text-[13px] text-[var(--app-fg-muted)]">
+                      {[c.jobTitle, c.company].filter(Boolean).join(" · ")}
+                    </p>
+                  ) : null}
+
+                  <div className="mt-1.5 space-y-0.5">
+                    {c.email ? (
+                      <a
+                        href={`mailto:${c.email}`}
+                        className="block truncate text-[13px] text-[var(--app-fg-muted)] underline-offset-2 hover:text-white hover:underline"
+                      >
+                        {c.email}
+                      </a>
+                    ) : null}
+                    {c.phone ? (
+                      <a
+                        href={`tel:${c.phone.replace(/[^\d+]/g, "")}`}
+                        className="block truncate text-[13px] text-[var(--app-fg-muted)] underline-offset-2 hover:text-white hover:underline"
+                      >
+                        {c.phone}
+                      </a>
+                    ) : null}
+                  </div>
+
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-[var(--app-fg-subtle)]">
+                      {meta.label}
+                    </span>
+                    <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-[var(--app-fg-subtle)]">
+                      {c.org.name}
+                    </span>
+                    <span className="text-[11px] text-[var(--app-fg-subtle)]">
+                      {c.createdAt.toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
       )}
     </div>
   );

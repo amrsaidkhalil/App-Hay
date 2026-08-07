@@ -1,25 +1,142 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   Design tokens — "Modern Dark (Cinema Mobile)".
+   Dark is the primary mode for the app shell; the public card page stays light
+   so a shared card reads well in any context. Never pure #000 (OLED smear).
+--------------------------------------------------------------------------- */
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  /* App shell surfaces */
+  --app-bg: #0b1120;
+  --app-surface: #121a2b;
+  --app-surface-2: #1a2438;
+  --app-border: rgba(255, 255, 255, 0.09);
+  --app-border-strong: rgba(255, 255, 255, 0.16);
+
+  /* Text — verified ≥4.5:1 on --app-bg for primary, ≥3:1 for secondary */
+  --app-fg: #f8fafc;
+  --app-fg-muted: #a9b6cc;
+  --app-fg-subtle: #7d8ba3;
+
+  /* Brand accents */
+  --accent: #3b82f6;
+  --accent-fg: #ffffff;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+
+  /* Spacing rhythm (4/8) + radii scale */
+  --r-sm: 0.5rem;
+  --r-md: 0.875rem;
+  --r-lg: 1.25rem;
+  --r-xl: 1.75rem;
+
+  /* Safe areas for fixed bars */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-app-bg: var(--app-bg);
+  --color-app-surface: var(--app-surface);
+  --color-app-surface-2: var(--app-surface-2);
+  --color-app-border: var(--app-border);
+  --color-app-fg: var(--app-fg);
+  --color-app-fg-muted: var(--app-fg-muted);
+  --color-app-fg-subtle: var(--app-fg-subtle);
+  --color-accent: var(--accent);
   --font-sans: var(--font-poppins);
   --font-poetsen: var(--font-poetsen);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-poppins), Arial, Helvetica, sans-serif;
+  font-family: var(--font-poppins), -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  /* Stop iOS rubber-band from revealing a mismatched color behind the shell */
+  overscroll-behavior-y: none;
 }
 
 @layer components {
+  /* Form control on dark surfaces */
   .input {
-    @apply w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-slate-400;
+    @apply w-full rounded-xl border px-4 text-[15px] outline-none transition;
+    min-height: 48px; /* ≥44pt touch target */
+    background: var(--app-surface-2);
+    border-color: var(--app-border);
+    color: var(--app-fg);
+    transition-duration: 200ms;
+    transition-timing-function: var(--ease-out);
+  }
+  .input::placeholder {
+    color: var(--app-fg-subtle);
+  }
+  .input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+  }
+
+  /* Same control, on the light public card page */
+  .input-light {
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 text-[15px] text-slate-900 outline-none transition;
+    min-height: 48px;
+    transition-duration: 200ms;
+  }
+  .input-light::placeholder {
+    color: #94a3b8;
+  }
+  .input-light:focus {
+    border-color: #0f172a;
+    box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.12);
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 text-[15px] font-semibold transition;
+    min-height: 48px;
+    background: var(--accent);
+    color: var(--accent-fg);
+    transition-duration: 200ms;
+    transition-timing-function: var(--ease-out);
+  }
+  .btn-primary:active {
+    transform: scale(0.97);
+  }
+  .btn-primary:disabled {
+    opacity: 0.45;
+    transform: none;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border px-5 text-[15px] font-medium transition;
+    min-height: 48px;
+    border-color: var(--app-border-strong);
+    color: var(--app-fg);
+    transition-duration: 200ms;
+  }
+  .btn-ghost:active {
+    transform: scale(0.97);
+  }
+
+  .card-surface {
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    border-radius: var(--r-lg);
+  }
+}
+
+/* Respect the user's motion preference — required, not optional */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .btn-primary:active,
+  .btn-ghost:active {
+    transform: none;
   }
 }

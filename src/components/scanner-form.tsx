@@ -1,6 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import {
+  Camera,
+  ScanLine,
+  Loader2,
+  Check,
+  AlertCircle,
+  UserPlus,
+} from "lucide-react";
 import type { ScannedFields } from "@/lib/scan-card";
 import { scanCardAction, saveScannedContactAction } from "@/app/dashboard/scanner/actions";
 
@@ -78,9 +86,9 @@ export function ScannerForm({
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
+    <div className="grid gap-6 lg:grid-cols-[300px_1fr] lg:items-start">
       <div className="space-y-3">
-        <label className="block cursor-pointer rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500 transition hover:border-slate-400">
+        <label className="flex min-h-[180px] cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[var(--app-border-strong)] bg-[var(--app-surface)] p-5 text-center transition-colors duration-200 hover:bg-white/[0.04]">
           <input
             type="file"
             accept="image/*"
@@ -90,9 +98,23 @@ export function ScannerForm({
           />
           {previewUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={previewUrl} alt="Selected card" className="mx-auto max-h-48 rounded-lg" />
+            <img
+              src={previewUrl}
+              alt="Selected business card"
+              className="max-h-48 rounded-xl"
+            />
           ) : (
-            "Take a photo or upload a business card image"
+            <>
+              <span
+                className="flex h-14 w-14 items-center justify-center rounded-full bg-white/[0.06] text-[var(--app-fg-muted)]"
+                aria-hidden
+              >
+                <Camera size={24} strokeWidth={1.6} />
+              </span>
+              <span className="text-sm text-[var(--app-fg-muted)]">
+                Take a photo or choose an image
+              </span>
+            </>
           )}
         </label>
 
@@ -100,31 +122,48 @@ export function ScannerForm({
           type="button"
           disabled={!file || scanning}
           onClick={onScan}
-          className="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-700 disabled:opacity-40"
+          className="btn-primary w-full"
         >
-          {scanning ? "Scanning…" : "Scan card"}
+          {scanning ? (
+            <>
+              <Loader2 size={17} className="animate-spin" aria-hidden />
+              Scanning…
+            </>
+          ) : (
+            <>
+              <ScanLine size={17} strokeWidth={1.9} aria-hidden />
+              Scan card
+            </>
+          )}
         </button>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {saved && (
-          <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-            Saved to leads.
+          <p className="flex items-center gap-2 rounded-xl bg-emerald-400/12 px-4 py-3 text-sm text-emerald-300">
+            <Check size={16} strokeWidth={2.2} aria-hidden />
+            Saved to contacts.
           </p>
         )}
         {error && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+          <p
+            role="alert"
+            className="flex items-start gap-2 rounded-xl bg-red-400/12 px-4 py-3 text-sm text-red-300"
+          >
+            <AlertCircle size={16} strokeWidth={2} className="mt-0.5 shrink-0" aria-hidden />
+            {error}
+          </p>
         )}
 
         {fields ? (
-          <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-5">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+          <div className="space-y-4 rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--app-fg-subtle)]">
               Confirm details
             </p>
 
             {orgs.length > 1 && (
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-slate-600">
+                <span className="mb-2 block text-[13px] font-medium text-[var(--app-fg-muted)]">
                   Save to
                 </span>
                 <select
@@ -151,7 +190,7 @@ export function ScannerForm({
               ] as const
             ).map(([key, label]) => (
               <label key={key} className="block">
-                <span className="mb-1 block text-xs font-medium text-slate-600">
+                <span className="mb-2 block text-[13px] font-medium text-[var(--app-fg-muted)]">
                   {label}
                 </span>
                 <input
@@ -168,15 +207,25 @@ export function ScannerForm({
               type="button"
               disabled={saving}
               onClick={onSave}
-              className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-500 disabled:opacity-40"
+              className="btn-primary w-full"
             >
-              {saving ? "Saving…" : "Save to leads"}
+              {saving ? (
+                <>
+                  <Loader2 size={17} className="animate-spin" aria-hidden />
+                  Saving…
+                </>
+              ) : (
+                <>
+                  <UserPlus size={17} strokeWidth={1.9} aria-hidden />
+                  Save to contacts
+                </>
+              )}
             </button>
           </div>
         ) : (
-          <p className="rounded-xl border border-dashed border-slate-200 bg-white p-6 text-sm text-slate-400">
-            Upload a card photo and scan it — fields will appear here for you
-            to confirm before saving.
+          <p className="rounded-2xl border border-dashed border-[var(--app-border)] p-6 text-sm leading-relaxed text-[var(--app-fg-subtle)]">
+            Scan a photo and the details appear here for you to check before
+            saving.
           </p>
         )}
       </div>
