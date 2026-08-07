@@ -109,11 +109,16 @@ model VerificationToken {
 }
 
 model Membership {
-  id     String  @id @default(cuid())
-  role   Role    @default(MEMBER)
-  // The brand this user wants to see first in their card list. At most one
-  // true per userId, enforced in the setPrimaryBrand action (not the DB).
+  id   String @id @default(cuid())
+  role Role   @default(MEMBER)
+  // Superseded by `order` (drag-reorder replaced the single "primary" star).
+  // Left in place rather than dropped, since removing a populated column
+  // needs an explicit accept-data-loss push — not worth doing for one bool.
   isPrimary Boolean @default(false)
+  // Position in this user's own card list — lower shows first. Drag-reordered
+  // in Settings; ties (e.g. two brands still at the default 0) fall back to
+  // alphabetical so a never-reordered list stays predictable.
+  order Int @default(0)
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
