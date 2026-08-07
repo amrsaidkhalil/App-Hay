@@ -28,15 +28,40 @@ this bypass is active whenever Google OAuth isn't configured and
 `NODE_ENV !== "production"`. The seeded dev user (`amr@example.com`) owns
 cards under Bilaal TV and Action MC.
 
-## What works today (Phase 1)
+## Brands
 
-- Card CRUD with live preview, per-org branding (colors/fonts)
+Scoped to **Bilaal TV** and **Action MC**. To add another, append it to `ORGS`
+in `prisma/seed.ts` and redeploy — the seed creates it and grants membership.
+
+The seed also prunes orgs that aren't in that list, but it refuses to delete
+one that still has cards or captured contacts (both cascade), so removing a
+brand from `ORGS` won't silently destroy data.
+
+## Card palette
+
+Each brand has three colors with distinct roles:
+
+| Field | Role |
+|---|---|
+| `primaryColor` | Solid card background |
+| `textColor` | Text printed on the card |
+| `secondaryColor` | Accent — logo ring, QR frame, QR modules |
+
+Two corrections are applied automatically in `src/lib/brand.ts`:
+the accent is nudged until it's visible against the background, and QR modules
+are darkened until they clear 7:1 against white — a pale accent would otherwise
+produce a code that looks fine but won't scan. The branding editor shows a live
+contrast ratio and warns below 4.5:1.
+
+## What works today
+
+- Card CRUD with live preview, per-brand palette and logo
 - Public card pages (`/c/[org]/[card]`) with QR code + `.vcf` download
-- Inbound lead capture ("share your info back" on the public page)
-- AI Contact Scanner (photo → parsed fields → confirm → save), once
-  `ANTHROPIC_API_KEY` is set
-- Leads table + CSV export
-- Org branding settings (owner/admin only)
+- Inbound lead capture ("share your details back" on the public page)
+- AI Contact Scanner (photo → parsed fields → confirm → save)
+- Contacts list + CSV export
+- Logo and photo upload (Vercel Blob)
+- Native share sheet, falling back to copy-link on desktop
 - Installable PWA (manifest + service worker, production only)
 
 ## Post-build checklist (Phase 2 — optional, gated by env vars)
