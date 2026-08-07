@@ -14,6 +14,11 @@ import {
 } from "lucide-react";
 import { BrandCard, type BrandCardData } from "./brand-card";
 import {
+  ImageAdjuster,
+  DEFAULT_FRAMING,
+  type ImageFraming,
+} from "./image-adjuster";
+import {
   InstagramGlyph,
   LinkedinGlyph,
   XGlyph,
@@ -39,6 +44,7 @@ type Theme = {
   secondaryColor: string;
   headingFont: string;
   logoUrl: string | null;
+  logoFraming: ImageFraming;
 };
 
 function Field({
@@ -71,6 +77,7 @@ export function CardEditorForm({
   cardSlug,
   theme,
   initialPhoto,
+  initialPhotoFraming,
   initial,
   canUpload,
   saveAction,
@@ -82,6 +89,7 @@ export function CardEditorForm({
   cardSlug: string;
   theme: Theme;
   initialPhoto: string;
+  initialPhotoFraming: ImageFraming;
   initial: CardFormValues;
   canUpload: boolean;
   saveAction: (formData: FormData) => void;
@@ -92,6 +100,7 @@ export function CardEditorForm({
   const [values, setValues] = useState<CardFormValues>(initial);
   const [slug, setSlug] = useState(cardSlug);
   const [photoUrl, setPhotoUrl] = useState(initialPhoto);
+  const [framing, setFraming] = useState<ImageFraming>(initialPhotoFraming);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -114,8 +123,11 @@ export function CardEditorForm({
       fd.append("file", file);
       fd.append("orgSlug", orgSlug);
       const result = await uploadAction(fd);
-      if (result.ok) setPhotoUrl(result.url);
-      else setUploadError(result.error);
+      if (result.ok) {
+        setPhotoUrl(result.url);
+        // A new image has its own proportions — old framing wouldn't apply.
+        setFraming(DEFAULT_FRAMING);
+      } else setUploadError(result.error);
     } catch {
       setUploadError("Upload failed — the image may be too large.");
     } finally {
@@ -129,7 +141,9 @@ export function CardEditorForm({
     jobTitle: values.jobTitle,
     orgName,
     logoUrl: theme.logoUrl,
+    logoFraming: theme.logoFraming,
     photoUrl: photoUrl || null,
+    photoFraming: framing,
     primaryColor: theme.primaryColor,
     textColor: theme.textColor,
     secondaryColor: theme.secondaryColor,
@@ -141,6 +155,9 @@ export function CardEditorForm({
       <form action={saveAction} className="space-y-7">
         <input type="hidden" name="orgSlug" value={orgSlug} />
         <input type="hidden" name="photoUrl" value={photoUrl} />
+        <input type="hidden" name="photoScale" value={framing.scale} />
+        <input type="hidden" name="photoOffsetX" value={framing.offsetX} />
+        <input type="hidden" name="photoOffsetY" value={framing.offsetY} />
 
         <section className="space-y-4">
           <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--app-fg-subtle)]">
@@ -214,6 +231,20 @@ export function CardEditorForm({
           ) : null}
           {uploadError ? (
             <p className="text-xs text-[var(--danger)]">{uploadError}</p>
+          ) : null}
+
+          {photoUrl ? (
+            <div className="rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface-2)] p-4">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--app-fg-subtle)]">
+                Fit the photo in the circle
+              </p>
+              <ImageAdjuster
+                src={photoUrl}
+                value={framing}
+                onChange={setFraming}
+                ringColor={theme.secondaryColor}
+              />
+            </div>
           ) : null}
         </section>
 

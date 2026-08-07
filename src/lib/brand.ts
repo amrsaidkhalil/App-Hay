@@ -9,8 +9,6 @@
  * no matter what color an org picks, while the hue still reads as theirs.
  */
 
-const CANVAS_INK = "#080d18";
-
 function clamp(n: number) {
   return Math.max(0, Math.min(255, Math.round(n)));
 }
@@ -78,8 +76,10 @@ export type CardTheme = {
   textMuted: string;
   /** Hairline border that reads against the background either way. */
   hairline: string;
-  /** QR module color, darkened if needed so the code still scans. */
+  /** QR module color. */
   qrDark: string;
+  /** QR quiet-zone / background color. */
+  qrLight: string;
   headingFont: string;
 };
 
@@ -122,11 +122,21 @@ export function buildCardTheme(
     guard += 1;
   }
 
-  let qrDark = secondary;
-  guard = 0;
-  while (contrastRatio(qrDark, "#ffffff") < 7 && guard < 20) {
-    qrDark = mix(qrDark, CANVAS_INK, 0.12);
-    guard += 1;
+  // QR modules take the background color, quiet zone takes the text color —
+  // so the code reads as an inverse of the card. Two corrections:
+  //   1. Most scanners assume dark-on-light and fail on an inverted code, so if
+  //      the pair comes out light-on-dark we swap it rather than ship one that
+  //      silently won't scan.
+  //   2. If the two are too close to separate, fall back to plain black/white;
+  //      an unscannable code is worse than an off-brand one.
+  let qrDark = background;
+  let qrLight = text;
+  if (luminance(qrDark) > luminance(qrLight)) {
+    [qrDark, qrLight] = [qrLight, qrDark];
+  }
+  if (contrastRatio(qrDark, qrLight) < 7) {
+    qrDark = "#000000";
+    qrLight = "#ffffff";
   }
 
   const towardBg = mix(text, background, 0.32);
@@ -138,6 +148,7 @@ export function buildCardTheme(
     textMuted: towardBg,
     hairline: mix(text, background, 0.72),
     qrDark,
+    qrLight,
     headingFont,
   };
 }

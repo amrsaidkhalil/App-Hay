@@ -30,6 +30,13 @@ model Organization {
   name    String
   logoUrl String?
 
+  // How the logo sits inside the round avatar. Uploaded logos are usually wide
+  // rectangles, so without these a logo just letterboxes into a tiny strip.
+  // scale is a multiplier; offsets are percentages of the frame.
+  logoScale   Float @default(1)
+  logoOffsetX Float @default(0)
+  logoOffsetY Float @default(0)
+
   // Card palette: primary is the solid card background, textColor is what's
   // printed on it, secondaryColor is the accent (logo ring, QR modules).
   primaryColor   String @default("#111827")
@@ -126,6 +133,11 @@ model Card {
   website   String?
   socialLinks String @default("{}") // JSON string: SQLite has no native Json type in this setup
   photoUrl  String?
+
+  // Same framing controls as the org logo, for the card's own photo.
+  photoScale   Float @default(1)
+  photoOffsetX Float @default(0)
+  photoOffsetY Float @default(0)
 
   ownerUserId String
   owner       User   @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)

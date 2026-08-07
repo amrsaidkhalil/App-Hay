@@ -60,6 +60,11 @@ export default async function OrgSettingsPage({
           initial={{
             name: org.name,
             logoUrl: org.logoUrl ?? "",
+            logoFraming: {
+              scale: org.logoScale,
+              offsetX: org.logoOffsetX,
+              offsetY: org.logoOffsetY,
+            },
             primaryColor: org.primaryColor,
             textColor: org.textColor,
             secondaryColor: org.secondaryColor,

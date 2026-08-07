@@ -5,6 +5,7 @@ import {
   Download,
   ScanLine,
   Wallet,
+  Plus,
 } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/prisma";
@@ -77,7 +78,7 @@ export default async function SettingsPage() {
         <div className="divide-y divide-[var(--app-border)] overflow-hidden rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)]">
           {manageable.length === 0 ? (
             <p className="px-4 py-6 text-sm text-[var(--app-fg-muted)]">
-              You don&apos;t manage any organization branding yet.
+              You don&apos;t manage any brands yet.
             </p>
           ) : (
             manageable.map(({ org, role }) => (
@@ -97,6 +98,11 @@ export default async function SettingsPage() {
               />
             ))
           )}
+          <Row
+            href="/dashboard/org/new"
+            icon={<Plus size={20} strokeWidth={1.9} />}
+            label="New brand"
+          />
         </div>
       </section>
 

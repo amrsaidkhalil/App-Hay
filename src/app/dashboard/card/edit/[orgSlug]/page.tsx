@@ -62,12 +62,22 @@ export default async function EditCardPage({
         cardSlug={card?.slug ?? ""}
         canUpload={blobConfigured}
         initialPhoto={card?.photoUrl ?? ""}
+        initialPhotoFraming={{
+          scale: card?.photoScale ?? 1,
+          offsetX: card?.photoOffsetX ?? 0,
+          offsetY: card?.photoOffsetY ?? 0,
+        }}
         theme={{
           primaryColor: org.primaryColor,
           textColor: org.textColor,
           secondaryColor: org.secondaryColor,
           headingFont: org.headingFont,
           logoUrl: org.logoUrl,
+          logoFraming: {
+            scale: org.logoScale,
+            offsetX: org.logoOffsetX,
+            offsetY: org.logoOffsetY,
+          },
         }}
         initial={{
           jobTitle: card?.jobTitle ?? "",

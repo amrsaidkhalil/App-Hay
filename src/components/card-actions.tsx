@@ -51,9 +51,9 @@ export function CardActions({
   return (
     <div className="mt-4 space-y-3">
       <div className="grid grid-cols-2 gap-2">
+        {/* Same tab, so the browser back button returns to the dashboard. */}
         <Link
           href={publicPath}
-          target="_blank"
           className="flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-[var(--app-border-strong)] text-sm font-medium text-white transition-colors duration-200 hover:bg-white/[0.06]"
         >
           <Eye size={17} strokeWidth={1.8} aria-hidden />

@@ -13,6 +13,18 @@ function slugify(input: string) {
     .replace(/(^-|-$)/g, "");
 }
 
+/** Framing values come from a slider/drag, so clamp rather than trust. */
+function safeNumber(
+  value: FormDataEntryValue | null,
+  fallback: number,
+  min: number,
+  max: number
+) {
+  const n = Number(String(value ?? ""));
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+}
+
 /** Only allow http(s) URLs — blocks javascript:/data: reaching an <img src>. */
 function safeUrl(value: FormDataEntryValue | null): string | null {
   const raw = String(value ?? "").trim();
@@ -59,6 +71,9 @@ export async function saveCardAction(formData: FormData) {
     email: String(formData.get("email") ?? "") || null,
     website: String(formData.get("website") ?? "") || null,
     photoUrl: safeUrl(formData.get("photoUrl")),
+    photoScale: safeNumber(formData.get("photoScale"), 1, 0.4, 3),
+    photoOffsetX: safeNumber(formData.get("photoOffsetX"), 0, -100, 100),
+    photoOffsetY: safeNumber(formData.get("photoOffsetY"), 0, -100, 100),
     socialLinks,
   };
 

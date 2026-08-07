@@ -3,6 +3,7 @@
    possible host or `hostname: "**"`, which turns the app into an open image
    proxy. These assets are small, so plain <img> is the safer trade. */
 import { buildCardTheme } from "@/lib/brand";
+import { framingStyle, type ImageFraming } from "./image-adjuster";
 import { cn } from "@/lib/utils";
 
 export type BrandCardData = {
@@ -11,6 +12,9 @@ export type BrandCardData = {
   orgName: string;
   logoUrl?: string | null;
   photoUrl?: string | null;
+  /** Framing for the avatar image — photo framing wins when a photo is set. */
+  logoFraming?: ImageFraming;
+  photoFraming?: ImageFraming;
   primaryColor: string;
   textColor: string;
   secondaryColor: string;
@@ -101,12 +105,18 @@ export function BrandCard({
               src={data.photoUrl}
               alt=""
               className="h-full w-full object-cover"
+              style={data.photoFraming ? framingStyle(data.photoFraming) : undefined}
             />
           ) : data.logoUrl ? (
             <img
               src={data.logoUrl}
               alt=""
-              className="h-full w-full object-contain p-2.5"
+              className="h-full w-full object-contain"
+              style={
+                data.logoFraming
+                  ? framingStyle(data.logoFraming)
+                  : { transform: "scale(0.72)" }
+              }
             />
           ) : (
             <span

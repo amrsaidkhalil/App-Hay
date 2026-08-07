@@ -31,6 +31,18 @@ function safeUrl(value: FormDataEntryValue | null): string | null {
   }
 }
 
+/** Framing values come from a slider/drag, so clamp rather than trust. */
+function safeNumber(
+  value: FormDataEntryValue | null,
+  fallback: number,
+  min: number,
+  max: number
+) {
+  const n = Number(String(value ?? ""));
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+}
+
 async function requireOrgAdmin(slug: string) {
   const user = await requireUser();
   const membership = await prisma.membership.findFirst({
@@ -53,6 +65,9 @@ export async function saveOrgSettingsAction(formData: FormData) {
     data: {
       name: String(formData.get("name") ?? "").trim() || undefined,
       logoUrl: safeUrl(formData.get("logoUrl")),
+      logoScale: safeNumber(formData.get("logoScale"), 1, 0.4, 3),
+      logoOffsetX: safeNumber(formData.get("logoOffsetX"), 0, -100, 100),
+      logoOffsetY: safeNumber(formData.get("logoOffsetY"), 0, -100, 100),
       primaryColor: safeHex(formData.get("primaryColor"), "#111827"),
       textColor: safeHex(formData.get("textColor"), "#ffffff"),
       secondaryColor: safeHex(formData.get("secondaryColor"), "#34d399"),

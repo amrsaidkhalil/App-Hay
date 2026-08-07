@@ -41,7 +41,7 @@ export default async function DashboardPage() {
         const qr = await QRCode.toDataURL(url, {
           margin: 0,
           width: 320,
-          color: { dark: theme.qrDark, light: "#ffffff" },
+          color: { dark: theme.qrDark, light: theme.qrLight },
         });
         return [card.id, qr] as const;
       })
@@ -53,19 +53,43 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-white">
-          My cards
-        </h1>
-        <p className="mt-1 text-sm text-[var(--app-fg-muted)]">
-          One card per brand. Share the link or let someone scan the QR.
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-white">
+            My cards
+          </h1>
+          <p className="mt-1 text-sm text-[var(--app-fg-muted)]">
+            One card per brand. Share the link or let someone scan the QR.
+          </p>
+        </div>
+        {memberships.length > 0 ? (
+          <Link href="/dashboard/org/new" className="btn-ghost text-sm">
+            <Plus size={16} strokeWidth={2.2} aria-hidden />
+            New brand
+          </Link>
+        ) : null}
       </header>
 
       {memberships.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-[var(--app-border-strong)] p-8 text-center text-sm text-[var(--app-fg-muted)]">
-          You&apos;re not a member of any organization yet.
-        </p>
+        <div className="rounded-2xl border border-dashed border-[var(--app-border-strong)] px-6 py-14 text-center">
+          <span
+            className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/[0.05] text-[var(--app-fg-subtle)]"
+            aria-hidden
+          >
+            <Sparkles size={24} strokeWidth={1.6} />
+          </span>
+          <p className="mt-4 text-[15px] font-medium text-white">
+            Create your first brand
+          </p>
+          <p className="mx-auto mt-1 max-w-xs text-sm leading-relaxed text-[var(--app-fg-muted)]">
+            A brand holds your colors, logo and cards — one for each company you
+            represent.
+          </p>
+          <Link href="/dashboard/org/new" className="btn-primary mt-5 inline-flex">
+            <Plus size={17} strokeWidth={2.2} aria-hidden />
+            New brand
+          </Link>
+        </div>
       ) : null}
 
       {withCards.length > 0 ? (
@@ -80,7 +104,17 @@ export default async function DashboardPage() {
                     jobTitle: card.jobTitle,
                     orgName: org.name,
                     logoUrl: org.logoUrl,
+                    logoFraming: {
+                      scale: org.logoScale,
+                      offsetX: org.logoOffsetX,
+                      offsetY: org.logoOffsetY,
+                    },
                     photoUrl: card.photoUrl,
+                    photoFraming: {
+                      scale: card.photoScale,
+                      offsetX: card.photoOffsetX,
+                      offsetY: card.photoOffsetY,
+                    },
                     primaryColor: org.primaryColor,
                     textColor: org.textColor,
                     secondaryColor: org.secondaryColor,

@@ -10,6 +10,11 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { BrandCard } from "./brand-card";
+import {
+  ImageAdjuster,
+  DEFAULT_FRAMING,
+  type ImageFraming,
+} from "./image-adjuster";
 import { contrastRatio } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
@@ -152,6 +157,7 @@ export function BrandingForm({
   initial: {
     name: string;
     logoUrl: string;
+    logoFraming: ImageFraming;
     primaryColor: string;
     textColor: string;
     secondaryColor: string;
@@ -164,6 +170,7 @@ export function BrandingForm({
 }) {
   const [name, setName] = useState(initial.name);
   const [logoUrl, setLogoUrl] = useState(initial.logoUrl);
+  const [framing, setFraming] = useState<ImageFraming>(initial.logoFraming);
   const [primary, setPrimary] = useState(initial.primaryColor);
   const [textColor, setTextColor] = useState(initial.textColor);
   const [secondary, setSecondary] = useState(initial.secondaryColor);
@@ -182,8 +189,11 @@ export function BrandingForm({
       fd.append("file", file);
       fd.append("orgSlug", orgSlug);
       const result = await uploadAction(fd);
-      if (result.ok) setLogoUrl(result.url);
-      else setUploadError(result.error);
+      if (result.ok) {
+        setLogoUrl(result.url);
+        // A new logo has its own proportions — old framing wouldn't apply.
+        setFraming(DEFAULT_FRAMING);
+      } else setUploadError(result.error);
     } catch {
       setUploadError("Upload failed — the image may be too large.");
     } finally {
@@ -197,6 +207,9 @@ export function BrandingForm({
       <form action={saveAction} className="space-y-7">
         <input type="hidden" name="slug" value={orgSlug} />
         <input type="hidden" name="logoUrl" value={logoUrl} />
+        <input type="hidden" name="logoScale" value={framing.scale} />
+        <input type="hidden" name="logoOffsetX" value={framing.offsetX} />
+        <input type="hidden" name="logoOffsetY" value={framing.offsetY} />
         <input type="hidden" name="primaryColor" value={primary} />
         <input type="hidden" name="textColor" value={textColor} />
         <input type="hidden" name="secondaryColor" value={secondary} />
@@ -294,6 +307,20 @@ export function BrandingForm({
           {uploadError ? (
             <p className="mt-2 text-xs text-[var(--danger)]">{uploadError}</p>
           ) : null}
+
+          {logoUrl ? (
+            <div className="mt-4 rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface-2)] p-4">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--app-fg-subtle)]">
+                Fit the logo in the circle
+              </p>
+              <ImageAdjuster
+                src={logoUrl}
+                value={framing}
+                onChange={setFraming}
+                ringColor={secondary}
+              />
+            </div>
+          ) : null}
         </div>
 
         <div>
@@ -365,6 +392,7 @@ export function BrandingForm({
             jobTitle: "Founder & Director",
             orgName: name || "Your brand",
             logoUrl: logoUrl || null,
+            logoFraming: framing,
             photoUrl: null,
             primaryColor: primary,
             textColor,

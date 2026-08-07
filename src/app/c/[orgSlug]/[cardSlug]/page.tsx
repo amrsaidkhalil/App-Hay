@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import QRCode from "qrcode";
-import { UserPlus, Wallet, Check } from "lucide-react";
+import { UserPlus, Wallet, Check, ArrowLeft } from "lucide-react";
+import { getCurrentUser } from "@/lib/dev-session";
 import { prisma } from "@/lib/prisma";
 import { parseSocialLinks } from "@/lib/utils";
 import { getBaseUrl } from "@/lib/site-url";
@@ -40,11 +42,16 @@ export default async function PublicCardPage({
   const qrDataUrl = await QRCode.toDataURL(pageUrl, {
     margin: 0,
     width: 380,
-    color: { dark: theme.qrDark, light: "#ffffff" },
+    color: { dark: theme.qrDark, light: theme.qrLight },
   });
 
   const displayName = card.owner.name ?? card.owner.email;
   const rows = buildContactRows(card);
+
+  // Owners land here from the dashboard and need a way back. Recipients should
+  // never see an app link they can't use, so it's gated on ownership.
+  const viewer = await getCurrentUser();
+  const viewerOwnsCard = viewer?.id === card.ownerUserId;
 
   const googleWalletUrl = googleWalletConfigured
     ? await buildGoogleWalletSaveUrl({
@@ -62,15 +69,35 @@ export default async function PublicCardPage({
   return (
     <div
       className="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pb-10"
-      style={{ paddingTop: "calc(var(--safe-top) + 1.5rem)" }}
+      style={{ paddingTop: "calc(var(--safe-top) + 1rem)" }}
     >
+      {viewerOwnsCard ? (
+        <Link
+          href="/dashboard"
+          className="mb-2 inline-flex min-h-[44px] items-center gap-1.5 self-start text-sm text-[var(--app-fg-muted)] transition-colors duration-200 hover:text-white"
+        >
+          <ArrowLeft size={16} strokeWidth={1.9} aria-hidden />
+          Back to my cards
+        </Link>
+      ) : null}
+
       <BrandCard
         data={{
           name: displayName,
           jobTitle: card.jobTitle,
           orgName: card.org.name,
           logoUrl: card.org.logoUrl,
+          logoFraming: {
+            scale: card.org.logoScale,
+            offsetX: card.org.logoOffsetX,
+            offsetY: card.org.logoOffsetY,
+          },
           photoUrl: card.photoUrl,
+          photoFraming: {
+            scale: card.photoScale,
+            offsetX: card.photoOffsetX,
+            offsetY: card.photoOffsetY,
+          },
           primaryColor: card.org.primaryColor,
           textColor: card.org.textColor,
           secondaryColor: card.org.secondaryColor,
