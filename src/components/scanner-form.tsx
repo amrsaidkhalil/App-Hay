@@ -31,14 +31,21 @@ export function ScannerForm({
     if (!file) return;
     setScanning(true);
     setError(null);
-    const formData = new FormData();
-    formData.append("image", file);
-    const result = await scanCardAction(formData);
-    setScanning(false);
-    if (result.ok) {
-      setFields(result.data);
-    } else {
-      setError(result.error);
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      const result = await scanCardAction(formData);
+      if (result.ok) {
+        setFields(result.data);
+      } else {
+        setError(result.error);
+      }
+    } catch {
+      setError(
+        "Scan failed — the photo may be too large. Try a closer, lower-resolution shot."
+      );
+    } finally {
+      setScanning(false);
     }
   }
 
@@ -46,22 +53,27 @@ export function ScannerForm({
     if (!fields) return;
     setSaving(true);
     setError(null);
-    const formData = new FormData();
-    formData.append("orgSlug", orgSlug);
-    formData.append("name", fields.name);
-    formData.append("jobTitle", fields.jobTitle);
-    formData.append("company", fields.company);
-    formData.append("phone", fields.phone);
-    formData.append("email", fields.email);
-    const result = await saveScannedContactAction(formData);
-    setSaving(false);
-    if (result.ok) {
-      setSaved(true);
-      setFields(null);
-      setFile(null);
-      setPreviewUrl(null);
-    } else {
-      setError(result.error);
+    try {
+      const formData = new FormData();
+      formData.append("orgSlug", orgSlug);
+      formData.append("name", fields.name);
+      formData.append("jobTitle", fields.jobTitle);
+      formData.append("company", fields.company);
+      formData.append("phone", fields.phone);
+      formData.append("email", fields.email);
+      const result = await saveScannedContactAction(formData);
+      if (result.ok) {
+        setSaved(true);
+        setFields(null);
+        setFile(null);
+        setPreviewUrl(null);
+      } else {
+        setError(result.error);
+      }
+    } catch {
+      setError("Save failed — try again.");
+    } finally {
+      setSaving(false);
     }
   }
 
