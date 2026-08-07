@@ -28,12 +28,12 @@ function Row({
   return (
     <Link
       href={href}
-      className="flex min-h-[56px] items-center gap-3 px-4 py-3 transition-colors duration-200 hover:bg-white/[0.04] active:bg-white/[0.07]"
+      className="flex min-h-[56px] items-center gap-3 px-4 py-3 transition-colors duration-200 hover:bg-[var(--app-overlay)] active:bg-[var(--app-overlay-strong)]"
     >
       <span className="text-[var(--app-fg-muted)]" aria-hidden>
         {icon}
       </span>
-      <span className="flex-1 text-[15px] text-white">{label}</span>
+      <span className="flex-1 text-[15px] text-[var(--app-fg)]">{label}</span>
       {hint ? (
         <span className="text-xs text-[var(--app-fg-subtle)]">{hint}</span>
       ) : null}
@@ -63,7 +63,7 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-white">
+        <h1 className="text-2xl font-semibold tracking-tight text-[var(--app-fg)]">
           Settings
         </h1>
         <p className="mt-1 text-sm text-[var(--app-fg-muted)]">
@@ -131,7 +131,7 @@ export default async function SettingsPage() {
               className="text-[var(--app-fg-muted)]"
               aria-hidden
             />
-            <span className="flex-1 text-[15px] text-white">
+            <span className="flex-1 text-[15px] text-[var(--app-fg)]">
               AI Contact Scanner
             </span>
             <StatusPill on={scannerConfigured} />
@@ -143,7 +143,7 @@ export default async function SettingsPage() {
               className="text-[var(--app-fg-muted)]"
               aria-hidden
             />
-            <span className="flex-1 text-[15px] text-white">Google Wallet</span>
+            <span className="flex-1 text-[15px] text-[var(--app-fg)]">Google Wallet</span>
             <StatusPill on={googleWalletConfigured} />
           </div>
           <div className="flex min-h-[56px] items-center gap-3 px-4 py-3">
@@ -153,7 +153,7 @@ export default async function SettingsPage() {
               className="text-[var(--app-fg-muted)]"
               aria-hidden
             />
-            <span className="flex-1 text-[15px] text-white">Apple Wallet</span>
+            <span className="flex-1 text-[15px] text-[var(--app-fg)]">Apple Wallet</span>
             <StatusPill on={appleWalletConfigured} />
           </div>
         </div>
@@ -166,7 +166,7 @@ export default async function SettingsPage() {
       <form action={signOutAction}>
         <button
           type="submit"
-          className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl border border-[var(--app-border-strong)] text-[15px] font-medium text-[var(--danger)] transition-colors duration-200 hover:bg-white/[0.04]"
+          className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl border border-[var(--app-border-strong)] text-[15px] font-medium text-[var(--danger)] transition-colors duration-200 hover:bg-[var(--app-overlay)]"
         >
           <LogOut size={18} strokeWidth={1.8} aria-hidden />
           Sign out
@@ -181,8 +181,8 @@ function StatusPill({ on }: { on: boolean }) {
     <span
       className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
         on
-          ? "bg-emerald-400/15 text-emerald-300"
-          : "bg-white/[0.07] text-[var(--app-fg-subtle)]"
+          ? "bg-emerald-500/10 text-emerald-700"
+          : "bg-[var(--app-overlay-strong)] text-[var(--app-fg-subtle)]"
       }`}
     >
       {on ? "Active" : "Not set up"}

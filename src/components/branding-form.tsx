@@ -73,8 +73,8 @@ function SwatchRow({
               className={cn(
                 "flex h-11 w-11 items-center justify-center rounded-full transition-transform duration-200",
                 active
-                  ? "ring-2 ring-white ring-offset-2 ring-offset-[var(--app-bg)]"
-                  : "ring-1 ring-white/15 hover:scale-105"
+                  ? "ring-2 ring-[var(--app-fg)] ring-offset-2 ring-offset-[var(--app-bg)]"
+                  : "ring-1 ring-[var(--app-border-strong)] hover:scale-105"
               )}
               style={{ background: hex }}
             >
@@ -87,7 +87,7 @@ function SwatchRow({
       </div>
 
       <div className="mt-3 flex items-center gap-2">
-        <label className="relative h-11 w-11 shrink-0 cursor-pointer overflow-hidden rounded-full ring-1 ring-white/15">
+        <label className="relative h-11 w-11 shrink-0 cursor-pointer overflow-hidden rounded-full ring-1 ring-[var(--app-border-strong)]">
           <span className="sr-only">Pick a custom {label.toLowerCase()}</span>
           <input
             type="color"
@@ -122,7 +122,7 @@ function ContrastNotice({ bg, text }: { bg: string; text: string }) {
     <p
       className={cn(
         "mt-3 flex items-start gap-2 rounded-xl px-3.5 py-2.5 text-xs leading-relaxed",
-        ok ? "bg-emerald-400/12 text-emerald-300" : "bg-amber-400/12 text-amber-200"
+        ok ? "bg-emerald-500/10 text-emerald-700" : "bg-amber-500/10 text-amber-800"
       )}
     >
       {ok ? (
@@ -357,8 +357,8 @@ export function BrandingForm({
                   className={cn(
                     "flex min-h-[56px] items-center justify-center gap-2 rounded-xl border text-[15px] transition-colors duration-200",
                     active
-                      ? "border-[var(--accent)] bg-[var(--accent)]/12 text-white"
-                      : "border-[var(--app-border-strong)] text-[var(--app-fg-muted)] hover:bg-white/[0.04]"
+                      ? "border-[var(--accent)] bg-[var(--accent)]/12 text-[var(--accent)]"
+                      : "border-[var(--app-border-strong)] text-[var(--app-fg-muted)] hover:bg-[var(--app-overlay)]"
                   )}
                   style={
                     font === "Poetsen One"

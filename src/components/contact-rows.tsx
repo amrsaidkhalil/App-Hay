@@ -59,10 +59,10 @@ export function ContactRow({ row }: { row: Row }) {
   return (
     <a
       href={href}
-      className="flex min-h-[60px] items-center gap-3.5 px-4 py-3 transition-colors duration-200 hover:bg-white/[0.05] active:bg-white/[0.08]"
+      className="flex min-h-[60px] items-center gap-3.5 px-4 py-3 transition-colors duration-200 hover:bg-[var(--app-overlay)] active:bg-[var(--app-overlay-strong)]"
     >
       <span
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/[0.07] text-[var(--app-fg-muted)]"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--app-overlay-strong)] text-[var(--app-fg-muted)]"
         aria-hidden
       >
         <Icon size={18} strokeWidth={1.8} />
@@ -71,7 +71,7 @@ export function ContactRow({ row }: { row: Row }) {
         <span className="block text-[11px] uppercase tracking-wide text-[var(--app-fg-subtle)]">
           {label}
         </span>
-        <span className="block truncate text-[15px] text-white">{value}</span>
+        <span className="block truncate text-[15px] text-[var(--app-fg)]">{value}</span>
       </span>
     </a>
   );

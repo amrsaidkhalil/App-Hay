@@ -29,7 +29,7 @@ export default async function LeadsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-white">
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--app-fg)]">
             Contacts
           </h1>
           <p className="mt-1 text-sm text-[var(--app-fg-muted)]">
@@ -49,12 +49,12 @@ export default async function LeadsPage() {
       {contacts.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-[var(--app-border-strong)] px-6 py-14 text-center">
           <span
-            className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/[0.05] text-[var(--app-fg-subtle)]"
+            className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--app-overlay)] text-[var(--app-fg-subtle)]"
             aria-hidden
           >
             <Users size={24} strokeWidth={1.6} />
           </span>
-          <p className="mt-4 text-[15px] font-medium text-white">
+          <p className="mt-4 text-[15px] font-medium text-[var(--app-fg)]">
             No contacts yet
           </p>
           <p className="mx-auto mt-1 max-w-xs text-sm leading-relaxed text-[var(--app-fg-muted)]">
@@ -73,14 +73,14 @@ export default async function LeadsPage() {
             return (
               <li key={c.id} className="flex items-start gap-3.5 px-4 py-4">
                 <span
-                  className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/[0.07] text-[var(--app-fg-muted)]"
+                  className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--app-overlay-strong)] text-[var(--app-fg-muted)]"
                   aria-hidden
                 >
                   <Icon size={17} strokeWidth={1.8} />
                 </span>
 
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[15px] font-medium text-white">
+                  <p className="truncate text-[15px] font-medium text-[var(--app-fg)]">
                     {c.name ?? "Unnamed contact"}
                   </p>
                   {c.jobTitle || c.company ? (
@@ -93,7 +93,7 @@ export default async function LeadsPage() {
                     {c.email ? (
                       <a
                         href={`mailto:${c.email}`}
-                        className="block truncate text-[13px] text-[var(--app-fg-muted)] underline-offset-2 hover:text-white hover:underline"
+                        className="block truncate text-[13px] text-[var(--app-fg-muted)] underline-offset-2 hover:text-[var(--app-fg)] hover:underline"
                       >
                         {c.email}
                       </a>
@@ -101,7 +101,7 @@ export default async function LeadsPage() {
                     {c.phone ? (
                       <a
                         href={`tel:${c.phone.replace(/[^\d+]/g, "")}`}
-                        className="block truncate text-[13px] text-[var(--app-fg-muted)] underline-offset-2 hover:text-white hover:underline"
+                        className="block truncate text-[13px] text-[var(--app-fg-muted)] underline-offset-2 hover:text-[var(--app-fg)] hover:underline"
                       >
                         {c.phone}
                       </a>
@@ -109,10 +109,10 @@ export default async function LeadsPage() {
                   </div>
 
                   <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                    <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-[var(--app-fg-subtle)]">
+                    <span className="rounded-full bg-[var(--app-overlay-strong)] px-2 py-0.5 text-[11px] text-[var(--app-fg-subtle)]">
                       {meta.label}
                     </span>
-                    <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-[var(--app-fg-subtle)]">
+                    <span className="rounded-full bg-[var(--app-overlay-strong)] px-2 py-0.5 text-[11px] text-[var(--app-fg-subtle)]">
                       {c.org.name}
                     </span>
                     <span className="text-[11px] text-[var(--app-fg-subtle)]">

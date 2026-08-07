@@ -37,16 +37,11 @@ export function BottomNav() {
                 className={cn(
                   "flex min-h-[56px] flex-col items-center justify-center gap-1 px-1 py-2 transition-colors duration-200",
                   active
-                    ? "text-white"
-                    : "text-[var(--app-fg-subtle)] active:text-white"
+                    ? "text-[var(--accent)]"
+                    : "text-[var(--app-fg-subtle)] active:text-[var(--app-fg)]"
                 )}
               >
-                <Icon
-                  size={22}
-                  strokeWidth={active ? 2.4 : 1.8}
-                  aria-hidden
-                  className={cn(active && "drop-shadow-[0_0_10px_var(--accent)]")}
-                />
+                <Icon size={22} strokeWidth={active ? 2.4 : 1.8} aria-hidden />
                 <span className="text-[11px] font-medium leading-none">
                   {label}
                 </span>

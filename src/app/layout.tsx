@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 
 // Tints the iOS status bar / Android chrome to match the app shell.
 export const viewport: Viewport = {
-  themeColor: "#0b1120",
+  themeColor: "#f1f2f5",
   // Let the shell paint into the notch/home-indicator area; fixed bars inside
   // handle their own safe-area padding.
   viewportFit: "cover",

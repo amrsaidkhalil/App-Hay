@@ -26,7 +26,7 @@ export default async function DashboardLayout({
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
           <Link
             href="/dashboard"
-            className="-my-2 flex min-h-[44px] items-center text-[15px] font-semibold tracking-tight text-white"
+            className="-my-2 flex min-h-[44px] items-center text-[15px] font-semibold tracking-tight text-[var(--app-fg)]"
           >
             Digital Cards
           </Link>
@@ -37,7 +37,7 @@ export default async function DashboardLayout({
                 <li key={href}>
                   <Link
                     href={href}
-                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--app-fg-muted)] transition-colors duration-200 hover:bg-white/5 hover:text-white"
+                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--app-fg-muted)] transition-colors duration-200 hover:bg-[var(--app-overlay)] hover:text-[var(--app-fg)]"
                   >
                     <Icon size={16} strokeWidth={1.8} aria-hidden />
                     {label}

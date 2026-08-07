@@ -22,7 +22,7 @@ export default async function LoginPage() {
           >
             <CreditCard size={26} strokeWidth={1.7} />
           </span>
-          <h1 className="mt-5 text-2xl font-semibold tracking-tight text-white">
+          <h1 className="mt-5 text-2xl font-semibold tracking-tight text-[var(--app-fg)]">
             Digital Cards
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-[var(--app-fg-muted)]">
@@ -48,7 +48,7 @@ export default async function LoginPage() {
             <form action={devLoginAction}>
               <button
                 type="submit"
-                className="flex min-h-[48px] w-full items-center justify-center rounded-xl border border-dashed border-amber-400/50 bg-amber-400/[0.07] px-4 text-[15px] font-medium text-amber-200 transition-colors duration-200 hover:bg-amber-400/[0.12]"
+                className="flex min-h-[48px] w-full items-center justify-center rounded-xl border border-dashed border-amber-400/50 bg-amber-400/[0.07] px-4 text-[15px] font-medium text-amber-800 transition-colors duration-200 hover:bg-amber-400/[0.12]"
               >
                 Continue as dev user (local only)
               </button>

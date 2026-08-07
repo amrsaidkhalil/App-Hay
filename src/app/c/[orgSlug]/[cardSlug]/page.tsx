@@ -88,7 +88,7 @@ export default async function PublicCardPage({
       {viewerOwnsCard ? (
         <Link
           href="/dashboard"
-          className="mb-2 inline-flex min-h-[44px] items-center gap-1.5 self-start text-sm text-[var(--app-fg-muted)] transition-colors duration-200 hover:text-white"
+          className="mb-2 inline-flex min-h-[44px] items-center gap-1.5 self-start text-sm text-[var(--app-fg-muted)] transition-colors duration-200 hover:text-[var(--app-fg)]"
         >
           <ArrowLeft size={16} strokeWidth={1.9} aria-hidden />
           Back to my cards
@@ -180,7 +180,7 @@ export default async function PublicCardPage({
                 rel="noopener noreferrer"
                 aria-label={label}
                 title={label}
-                className="flex h-12 w-12 items-center justify-center rounded-full border border-[var(--app-border-strong)] text-[var(--app-fg-muted)] transition-colors duration-200 hover:bg-white/[0.06] hover:text-white"
+                className="flex h-12 w-12 items-center justify-center rounded-full border border-[var(--app-border-strong)] text-[var(--app-fg-muted)] transition-colors duration-200 hover:bg-[var(--app-overlay-strong)] hover:text-[var(--app-fg)]"
               >
                 <Glyph size={18} />
               </a>
@@ -190,11 +190,11 @@ export default async function PublicCardPage({
       ) : null}
 
       <div className="mt-8 rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-5">
-        <h2 className="text-[15px] font-semibold text-white">
+        <h2 className="text-[15px] font-semibold text-[var(--app-fg)]">
           Share your details back
         </h2>
         {shared ? (
-          <p className="mt-3 flex items-center gap-2 rounded-xl bg-emerald-400/12 px-4 py-3 text-sm text-emerald-300">
+          <p className="mt-3 flex items-center gap-2 rounded-xl bg-emerald-400/12 px-4 py-3 text-sm text-emerald-700">
             <Check size={16} strokeWidth={2.2} aria-hidden />
             Thanks — {displayName.split(" ")[0]} has your details.
           </p>

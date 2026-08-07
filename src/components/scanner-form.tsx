@@ -88,7 +88,7 @@ export function ScannerForm({
   return (
     <div className="grid gap-6 lg:grid-cols-[300px_1fr] lg:items-start">
       <div className="space-y-3">
-        <label className="flex min-h-[180px] cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[var(--app-border-strong)] bg-[var(--app-surface)] p-5 text-center transition-colors duration-200 hover:bg-white/[0.04]">
+        <label className="flex min-h-[180px] cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[var(--app-border-strong)] bg-[var(--app-surface)] p-5 text-center transition-colors duration-200 hover:bg-[var(--app-overlay)]">
           <input
             type="file"
             accept="image/*"
@@ -106,7 +106,7 @@ export function ScannerForm({
           ) : (
             <>
               <span
-                className="flex h-14 w-14 items-center justify-center rounded-full bg-white/[0.06] text-[var(--app-fg-muted)]"
+                className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--app-overlay-strong)] text-[var(--app-fg-muted)]"
                 aria-hidden
               >
                 <Camera size={24} strokeWidth={1.6} />
@@ -140,7 +140,7 @@ export function ScannerForm({
 
       <div className="space-y-3">
         {saved && (
-          <p className="flex items-center gap-2 rounded-xl bg-emerald-400/12 px-4 py-3 text-sm text-emerald-300">
+          <p className="flex items-center gap-2 rounded-xl bg-emerald-400/12 px-4 py-3 text-sm text-emerald-700">
             <Check size={16} strokeWidth={2.2} aria-hidden />
             Saved to contacts.
           </p>

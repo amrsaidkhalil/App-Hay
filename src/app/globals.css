@@ -1,29 +1,31 @@
 @import "tailwindcss";
 
 /* ---------------------------------------------------------------------------
-   Design tokens — "Modern Dark (Cinema Mobile)".
-   Dark is the primary mode for the app shell; the public card page stays light
-   so a shared card reads well in any context. Never pure #000 (OLED smear).
+   Design tokens — light app shell. Cards keep their own per-brand colors;
+   this is just the chrome around them (nav, buttons, list rows).
 --------------------------------------------------------------------------- */
 :root {
   /* App shell surfaces */
-  --app-bg: #0b1120;
-  --app-surface: #121a2b;
-  --app-surface-2: #1a2438;
-  --app-border: rgba(255, 255, 255, 0.09);
-  --app-border-strong: rgba(255, 255, 255, 0.16);
+  --app-bg: #f1f2f5;
+  --app-surface: #ffffff;
+  --app-surface-2: #f4f5f8;
+  --app-border: rgba(15, 23, 42, 0.08);
+  --app-border-strong: rgba(15, 23, 42, 0.14);
+  /* Subtle overlay for hover/active states on light surfaces */
+  --app-overlay: rgba(15, 23, 42, 0.045);
+  --app-overlay-strong: rgba(15, 23, 42, 0.08);
 
   /* Text — verified ≥4.5:1 on --app-bg for primary, ≥3:1 for secondary */
-  --app-fg: #f8fafc;
-  --app-fg-muted: #a9b6cc;
-  --app-fg-subtle: #7d8ba3;
+  --app-fg: #0f172a;
+  --app-fg-muted: #5b6478;
+  --app-fg-subtle: #8891a3;
 
   /* Brand accents */
-  --accent: #3b82f6;
+  --accent: #3b6ef5;
   --accent-fg: #ffffff;
-  --success: #34d399;
-  --warning: #fbbf24;
-  --danger: #f87171;
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
 
   /* Spacing rhythm (4/8) + radii scale */
   --r-sm: 0.5rem;

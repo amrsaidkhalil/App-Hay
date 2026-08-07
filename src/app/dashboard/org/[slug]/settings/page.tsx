@@ -29,19 +29,19 @@ export default async function OrgSettingsPage({
       <div>
         <Link
           href="/dashboard/settings"
-          className="inline-flex min-h-[44px] items-center gap-1.5 text-sm text-[var(--app-fg-muted)] transition-colors duration-200 hover:text-white"
+          className="inline-flex min-h-[44px] items-center gap-1.5 text-sm text-[var(--app-fg-muted)] transition-colors duration-200 hover:text-[var(--app-fg)]"
         >
           <ArrowLeft size={16} strokeWidth={1.9} aria-hidden />
           Settings
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-white">
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-[var(--app-fg)]">
           {org.name} branding
         </h1>
         <p className="mt-1 text-sm text-[var(--app-fg-muted)]">
           Applies to every card and public page under this brand.
         </p>
         {saved ? (
-          <p className="mt-3 inline-flex items-center gap-2 rounded-xl bg-emerald-400/12 px-3.5 py-2 text-sm text-emerald-300">
+          <p className="mt-3 inline-flex items-center gap-2 rounded-xl bg-emerald-400/12 px-3.5 py-2 text-sm text-emerald-700">
             <Check size={15} strokeWidth={2.4} aria-hidden />
             Branding saved
           </p>

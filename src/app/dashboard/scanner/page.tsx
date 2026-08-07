@@ -16,7 +16,7 @@ export default async function ScannerPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-white">
+        <h1 className="text-2xl font-semibold tracking-tight text-[var(--app-fg)]">
           Scan a card
         </h1>
         <p className="mt-1 text-sm text-[var(--app-fg-muted)]">
@@ -27,16 +27,16 @@ export default async function ScannerPage() {
       {!scannerConfigured ? (
         <div className="rounded-2xl border border-dashed border-amber-400/40 bg-amber-400/[0.06] px-6 py-10 text-center">
           <span
-            className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-400/10 text-amber-300"
+            className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-400/10 text-amber-700"
             aria-hidden
           >
             <ScanLine size={24} strokeWidth={1.6} />
           </span>
-          <p className="mt-4 text-[15px] font-medium text-white">
+          <p className="mt-4 text-[15px] font-medium text-[var(--app-fg)]">
             Scanner isn&apos;t set up yet
           </p>
           <p className="mx-auto mt-1 max-w-xs text-sm leading-relaxed text-[var(--app-fg-muted)]">
-            Add an <code className="font-mono text-amber-200">ANTHROPIC_API_KEY</code>{" "}
+            Add an <code className="font-mono text-amber-800">ANTHROPIC_API_KEY</code>{" "}
             to switch this on.
           </p>
         </div>

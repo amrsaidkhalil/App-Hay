@@ -23,12 +23,12 @@ export default async function NewOrgPage({
       <div>
         <Link
           href="/dashboard"
-          className="inline-flex min-h-[44px] items-center gap-1.5 text-sm text-[var(--app-fg-muted)] transition-colors duration-200 hover:text-white"
+          className="inline-flex min-h-[44px] items-center gap-1.5 text-sm text-[var(--app-fg-muted)] transition-colors duration-200 hover:text-[var(--app-fg)]"
         >
           <ArrowLeft size={16} strokeWidth={1.9} aria-hidden />
           My cards
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-white">
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-[var(--app-fg)]">
           New brand
         </h1>
         <p className="mt-1 text-sm leading-relaxed text-[var(--app-fg-muted)]">
@@ -40,7 +40,7 @@ export default async function NewOrgPage({
       {message ? (
         <p
           role="alert"
-          className="rounded-xl bg-amber-400/12 px-4 py-3 text-sm text-amber-200"
+          className="rounded-xl bg-amber-400/12 px-4 py-3 text-sm text-amber-800"
         >
           {message}
         </p>

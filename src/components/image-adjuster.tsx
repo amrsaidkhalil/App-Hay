@@ -148,7 +148,7 @@ export function ImageAdjuster({
           <button
             type="button"
             onClick={() => onChange(DEFAULT_FRAMING)}
-            className="inline-flex min-h-[36px] items-center gap-1.5 text-xs text-[var(--app-fg-muted)] transition-colors duration-200 hover:text-white"
+            className="inline-flex min-h-[36px] items-center gap-1.5 text-xs text-[var(--app-fg-muted)] transition-colors duration-200 hover:text-[var(--app-fg)]"
           >
             <RotateCcw size={13} strokeWidth={1.9} aria-hidden />
             Reset framing

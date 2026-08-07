@@ -5,8 +5,7 @@ import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/prisma";
 import { getBaseUrl } from "@/lib/site-url";
 import { buildCardTheme } from "@/lib/brand";
-import { BrandCard } from "@/components/brand-card";
-import { CardActions } from "@/components/card-actions";
+import { CardCarousel } from "@/components/card-carousel";
 
 export default async function DashboardPage() {
   const user = await requireUser();
@@ -55,7 +54,7 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-white">
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--app-fg)]">
             My cards
           </h1>
           <p className="mt-1 text-sm text-[var(--app-fg-muted)]">
@@ -73,12 +72,12 @@ export default async function DashboardPage() {
       {memberships.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-[var(--app-border-strong)] px-6 py-14 text-center">
           <span
-            className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/[0.05] text-[var(--app-fg-subtle)]"
+            className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--app-overlay-strong)] text-[var(--app-fg-subtle)]"
             aria-hidden
           >
             <Sparkles size={24} strokeWidth={1.6} />
           </span>
-          <p className="mt-4 text-[15px] font-medium text-white">
+          <p className="mt-4 text-[15px] font-medium text-[var(--app-fg)]">
             Create your first brand
           </p>
           <p className="mx-auto mt-1 max-w-xs text-sm leading-relaxed text-[var(--app-fg-muted)]">
@@ -93,46 +92,40 @@ export default async function DashboardPage() {
       ) : null}
 
       {withCards.length > 0 ? (
-        <div className="grid gap-6 sm:grid-cols-2">
-          {withCards.map(({ org }) => {
+        <CardCarousel
+          cards={withCards.map(({ org }) => {
             const card = cardByOrgId.get(org.id)!;
-            return (
-              <section key={org.id}>
-                <BrandCard
-                  data={{
-                    name: displayName,
-                    jobTitle: card.jobTitle,
-                    orgName: org.name,
-                    logoUrl: org.logoUrl,
-                    logoFraming: {
-                      scale: org.logoScale,
-                      offsetX: org.logoOffsetX,
-                      offsetY: org.logoOffsetY,
-                    },
-                    photoUrl: card.photoUrl,
-                    photoFraming: {
-                      scale: card.photoScale,
-                      offsetX: card.photoOffsetX,
-                      offsetY: card.photoOffsetY,
-                    },
-                    primaryColor: org.primaryColor,
-                    textColor: org.textColor,
-                    secondaryColor: org.secondaryColor,
-                    headingFont: org.headingFont,
-                  }}
-                  qrDataUrl={qrByCardId.get(card.id)}
-                  size="sm"
-                />
-                <CardActions
-                  publicPath={`/c/${org.slug}/${card.slug}`}
-                  editPath={`/dashboard/card/edit/${org.slug}`}
-                  name={displayName}
-                  orgName={org.name}
-                />
-              </section>
-            );
+            return {
+              orgId: org.id,
+              data: {
+                name: displayName,
+                jobTitle: card.jobTitle,
+                orgName: org.name,
+                logoUrl: org.logoUrl,
+                logoFraming: {
+                  scale: org.logoScale,
+                  offsetX: org.logoOffsetX,
+                  offsetY: org.logoOffsetY,
+                },
+                photoUrl: card.photoUrl,
+                photoFraming: {
+                  scale: card.photoScale,
+                  offsetX: card.photoOffsetX,
+                  offsetY: card.photoOffsetY,
+                },
+                primaryColor: org.primaryColor,
+                textColor: org.textColor,
+                secondaryColor: org.secondaryColor,
+                headingFont: org.headingFont,
+              },
+              qrDataUrl: qrByCardId.get(card.id),
+              publicPath: `/c/${org.slug}/${card.slug}`,
+              editPath: `/dashboard/card/edit/${org.slug}`,
+              name: displayName,
+              orgName: org.name,
+            };
           })}
-        </div>
+        />
       ) : null}
 
       {withoutCards.length > 0 ? (
@@ -145,7 +138,7 @@ export default async function DashboardPage() {
               <Link
                 key={org.id}
                 href={`/dashboard/card/edit/${org.slug}`}
-                className="group flex min-h-[72px] items-center gap-4 rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-4 transition-colors duration-200 hover:border-[var(--app-border-strong)] hover:bg-white/[0.04]"
+                className="group flex min-h-[72px] items-center gap-4 rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-4 transition-colors duration-200 hover:border-[var(--app-border-strong)] hover:bg-[var(--app-overlay)]"
               >
                 <span
                   className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 ring-white/10"
@@ -157,7 +150,7 @@ export default async function DashboardPage() {
                   <Sparkles size={18} strokeWidth={1.9} className="text-white/90" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[15px] font-medium text-white">
+                  <span className="block truncate text-[15px] font-medium text-[var(--app-fg)]">
                     {org.name}
                   </span>
                   <span className="text-xs text-[var(--app-fg-subtle)]">
@@ -165,7 +158,7 @@ export default async function DashboardPage() {
                   </span>
                 </span>
                 <span
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/[0.07] text-white transition-colors duration-200 group-hover:bg-[var(--accent)]"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--app-overlay-strong)] text-[var(--app-fg-muted)] transition-colors duration-200 group-hover:bg-[var(--accent)] group-hover:text-white"
                   aria-hidden
                 >
                   <Plus size={18} strokeWidth={2.2} />
