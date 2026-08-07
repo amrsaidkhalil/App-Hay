@@ -57,7 +57,7 @@ export default async function NewOrgPage({
             required
             autoFocus
             maxLength={60}
-            placeholder="Acme Media"
+            placeholder="Brand name"
             className="input"
           />
         </label>
