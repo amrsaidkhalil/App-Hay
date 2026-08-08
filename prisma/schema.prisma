@@ -55,9 +55,15 @@ model Organization {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id String @id @default(cuid())
+  /// Login identity, owned by the auth provider — never user-editable, since
+  /// changing it here would desync the account from Google sign-in.
   email         String    @unique
   name          String?
+  /// Account-level contact details, editable in My Account. Kept separate
+  /// from `email` so a typo can't lock someone out of their own account.
+  phone         String?
+  workEmail     String?
   image         String?
   emailVerified DateTime?
   createdAt     DateTime  @default(now())

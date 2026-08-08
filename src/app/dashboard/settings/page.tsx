@@ -1,4 +1,5 @@
 import Link from "next/link";
+import QRCode from "qrcode";
 import {
   ChevronRight,
   LogOut,
@@ -6,13 +7,17 @@ import {
   ScanLine,
   Wallet,
   Plus,
+  UserCog,
 } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/prisma";
+import { getBaseUrl } from "@/lib/site-url";
+import { buildCardTheme } from "@/lib/brand";
 import { scannerConfigured } from "@/lib/scan-card";
 import { appleWalletConfigured } from "@/lib/wallet/apple";
 import { googleWalletConfigured } from "@/lib/wallet/google";
 import { BrandOrderList } from "@/components/brand-order-list";
+import { QrActions } from "@/components/qr-actions";
 import { signOutAction } from "../actions";
 
 function Row({
@@ -61,6 +66,29 @@ export default async function SettingsPage() {
     (m) => m.role === "OWNER" || m.role === "ADMIN"
   );
 
+  // QR shortcuts act on the card the user put first in their own ordering,
+  // which is the one they hand out most.
+  const cards = await prisma.card.findMany({ where: { ownerUserId: user.id } });
+  const primary = memberships.find((m) => cards.some((c) => c.orgId === m.orgId));
+  const primaryCard = primary
+    ? cards.find((c) => c.orgId === primary.orgId)
+    : undefined;
+
+  let primaryQr: string | null = null;
+  if (primary && primaryCard) {
+    const baseUrl = await getBaseUrl();
+    const theme = buildCardTheme(
+      primary.org.primaryColor,
+      primary.org.textColor,
+      primary.org.secondaryColor,
+      primary.org.headingFont
+    );
+    primaryQr = await QRCode.toDataURL(
+      `${baseUrl}/c/${primary.org.slug}/${primaryCard.slug}`,
+      { margin: 2, width: 720, color: { dark: theme.qrDark, light: theme.qrLight } }
+    );
+  }
+
   return (
     <div className="space-y-8">
       <header>
@@ -107,6 +135,33 @@ export default async function SettingsPage() {
             Long-press and drag a brand to reorder it. Swipe left to delete.
           </p>
         ) : null}
+      </section>
+
+      {primaryQr && primary ? (
+        <section>
+          <h2 className="px-1 pb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--app-fg-subtle)]">
+            My QR code
+          </h2>
+          <div className="divide-y divide-[var(--app-border)] overflow-hidden rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)]">
+            <QrActions qrDataUrl={primaryQr} fileLabel={primary.org.name} />
+          </div>
+          <p className="px-1 pt-2 text-xs leading-relaxed text-[var(--app-fg-subtle)]">
+            Uses your {primary.org.name} card — the first one in your list.
+          </p>
+        </section>
+      ) : null}
+
+      <section>
+        <h2 className="px-1 pb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--app-fg-subtle)]">
+          Account
+        </h2>
+        <div className="divide-y divide-[var(--app-border)] overflow-hidden rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)]">
+          <Row
+            href="/dashboard/account"
+            icon={<UserCog size={20} strokeWidth={1.8} />}
+            label="My account"
+          />
+        </div>
       </section>
 
       <section>
