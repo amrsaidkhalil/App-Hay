@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { Download, ScanLine, UserPlus, Users, ChevronRight } from "lucide-react";
+import {
+  Download,
+  ScanLine,
+  UserPlus,
+  UserPlus2,
+  Users,
+  ChevronRight,
+} from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/prisma";
 
@@ -9,6 +16,7 @@ const SOURCE_META: Record<
 > = {
   AI_SCAN: { label: "Scanned", Icon: ScanLine },
   CARD_INBOUND: { label: "Shared with you", Icon: UserPlus },
+  MANUAL: { label: "Added manually", Icon: UserPlus2 },
 };
 
 export default async function LeadsPage() {
@@ -46,6 +54,11 @@ export default async function LeadsPage() {
           </Link>
         ) : null}
       </div>
+
+      <Link href="/dashboard/leads/new" className="btn-primary w-full">
+        <UserPlus2 size={18} strokeWidth={1.9} aria-hidden />
+        Add New Contact
+      </Link>
 
       {contacts.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-[var(--app-border-strong)] px-6 py-14 text-center">

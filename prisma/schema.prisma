@@ -18,6 +18,7 @@ enum Role {
 enum ContactSource {
   AI_SCAN
   CARD_INBOUND
+  MANUAL
 }
 
 enum CrmProvider {
