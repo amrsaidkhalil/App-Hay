@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChevronRight, Trash2 } from "lucide-react";
 import { reorderBrandsAction, deleteBrandAction } from "@/app/dashboard/actions";
 
@@ -27,6 +27,7 @@ const SWIPE_COMMIT_RATIO = 0.4; // fraction of SWIPE_OPEN_PX to snap open on rel
  * arms the long-press timer, early horizontal movement means swipe.
  */
 export function BrandOrderList({ brands: initialBrands }: { brands: Brand[] }) {
+  const router = useRouter();
   const [brands, setBrands] = useState(initialBrands);
   const [openRowId, setOpenRowId] = useState<string | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
@@ -36,6 +37,7 @@ export function BrandOrderList({ brands: initialBrands }: { brands: Brand[] }) {
   const rowRefs = useRef<Map<string, HTMLLIElement>>(new Map());
   const gesture = useRef<{
     orgId: string;
+    orgSlug: string;
     startX: number;
     startY: number;
     mode: "pending" | "swipe" | "drag" | "cancelled";
@@ -56,7 +58,7 @@ export function BrandOrderList({ brands: initialBrands }: { brands: Brand[] }) {
   }, []);
 
   const onPointerDown = useCallback(
-    (orgId: string, e: React.PointerEvent<HTMLLIElement>) => {
+    (orgId: string, orgSlug: string, e: React.PointerEvent<HTMLLIElement>) => {
       if (e.pointerType === "mouse" && e.button !== 0) return;
       setOpenRowId((cur) => (cur && cur !== orgId ? null : cur));
 
@@ -74,6 +76,7 @@ export function BrandOrderList({ brands: initialBrands }: { brands: Brand[] }) {
 
       gesture.current = {
         orgId,
+        orgSlug,
         startX: e.clientX,
         startY: e.clientY,
         mode: "pending",
@@ -169,9 +172,20 @@ export function BrandOrderList({ brands: initialBrands }: { brands: Brand[] }) {
       persistOrder(g.dragOrder);
     }
 
+    // Never armed into a swipe or a drag — a plain tap. A row with its
+    // delete button already revealed just closes instead of navigating,
+    // same as tapping anywhere else to dismiss it.
+    if (g.mode === "pending") {
+      if (openRowId === g.orgId) {
+        setOpenRowId(null);
+      } else {
+        router.push(`/dashboard/org/${g.orgSlug}/settings`);
+      }
+    }
+
     setDraggingId(null);
     gesture.current = null;
-  }, [persistOrder]);
+  }, [persistOrder, openRowId, router]);
 
   return (
     <ul
@@ -183,7 +197,7 @@ export function BrandOrderList({ brands: initialBrands }: { brands: Brand[] }) {
           key={brand.orgId}
           ref={(el) => setRowRef(brand.orgId, el)}
           data-brand-row={brand.orgId}
-          onPointerDown={(e) => onPointerDown(brand.orgId, e)}
+          onPointerDown={(e) => onPointerDown(brand.orgId, brand.orgSlug, e)}
           onPointerMove={onPointerMove}
           onPointerUp={endGesture}
           onPointerCancel={endGesture}
@@ -226,12 +240,17 @@ export function BrandOrderList({ brands: initialBrands }: { brands: Brand[] }) {
               }}
               aria-hidden
             />
-            <Link
-              href={`/dashboard/org/${brand.orgSlug}/settings`}
-              className="flex min-w-0 flex-1 items-center gap-3"
-              onClick={(e) => {
-                if (openRowId === brand.orgId) e.preventDefault();
+            <div
+              role="link"
+              tabIndex={0}
+              aria-label={`${brand.name} branding settings`}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  router.push(`/dashboard/org/${brand.orgSlug}/settings`);
+                }
               }}
+              className="flex min-w-0 flex-1 items-center gap-3"
             >
               <span className="min-w-0 flex-1 truncate text-[15px] text-[var(--app-fg)]">
                 {brand.name}
@@ -243,7 +262,7 @@ export function BrandOrderList({ brands: initialBrands }: { brands: Brand[] }) {
                 className="shrink-0 text-[var(--app-fg-subtle)]"
                 aria-hidden
               />
-            </Link>
+            </div>
           </div>
         </li>
       ))}
