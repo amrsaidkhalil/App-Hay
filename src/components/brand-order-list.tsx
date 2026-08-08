@@ -111,6 +111,10 @@ export function BrandOrderList({ brands: initialBrands }: { brands: Brand[] }) {
       }
 
       if (g.mode === "swipe") {
+        // Stop iOS from treating this as a scroll now that we've claimed it —
+        // without this the row can visually stick while the page scrolls
+        // underneath it.
+        e.preventDefault();
         g.swipeOffset = Math.min(0, Math.max(-SWIPE_OPEN_PX * 1.3, dx));
         const row = rowRefs.current.get(g.orgId);
         if (row) {
@@ -121,6 +125,9 @@ export function BrandOrderList({ brands: initialBrands }: { brands: Brand[] }) {
       }
 
       if (g.mode === "drag") {
+        // Same reasoning — once the long-press has armed a drag, further
+        // vertical movement must move the row, not scroll the page.
+        e.preventDefault();
         // Find which sibling row the pointer is currently over and swap ranks.
         const overEl = document
           .elementsFromPoint(e.clientX, e.clientY)
@@ -181,6 +188,7 @@ export function BrandOrderList({ brands: initialBrands }: { brands: Brand[] }) {
           onPointerUp={endGesture}
           onPointerCancel={endGesture}
           className="relative touch-pan-y select-none overflow-hidden"
+          style={{ WebkitTouchCallout: "none" } as React.CSSProperties}
         >
           {/* Delete sits underneath, revealed as the row slides left. */}
           <div className="absolute inset-y-0 right-0 flex w-[76px] items-center justify-center bg-[var(--danger)]">
